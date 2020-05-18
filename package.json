@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/jonparker/toyrobot/issues"
   },
-  "homepage": "https://github.com/jonparker/toyrobot#readme"
+  "homepage": "https://github.com/jonparker/toyrobot#readme",
+  "devDependencies": {
+    "eslint": "^7.0.0",
+    "typescript": "^3.9.2"
+  }
 }
