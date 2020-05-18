@@ -1,0 +1,24 @@
+{
+  "name": "toyrobot",
+  "version": "1.0.0",
+  "description": "Toy Robot Simulator",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonparker/toyrobot.git"
+  },
+  "keywords": [
+    "Toy",
+    "Robot",
+    "Simulator"
+  ],
+  "author": "Jonathan Parker",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonparker/toyrobot/issues"
+  },
+  "homepage": "https://github.com/jonparker/toyrobot#readme"
+}
