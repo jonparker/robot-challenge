@@ -6,7 +6,8 @@
   "scripts": {
     "test": "test",
     "build": "tsc",
-    "start": "npm run-script build && node index.js"
+    "lint": "tslint .",
+    "start": "npm  run-script lint && npm run-script build && node index.js"
   },
   "repository": {
     "type": "git",
