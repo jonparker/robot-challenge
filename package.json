@@ -4,7 +4,7 @@
   "description": "Toy Robot Simulator",
   "main": "index.js",
   "scripts": {
-    "test": "test",
+    "test": "npm run-script build && node specs/specs.js",
     "build": "tsc",
     "lint": "tslint --project tslint.json",
     "start": "npm run-script build && node src/index.js"
