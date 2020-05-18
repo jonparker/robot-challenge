@@ -3,6 +3,9 @@ import { Command } from './Command';
 
 class Robot {
     location: string;
+    Report() {
+        return this.location;
+    }
     constructor() {
         this.location = "(0,0)";
     }
@@ -12,6 +15,7 @@ class Robot {
 //let foo = new Robot();
 //console.log(foo.location);
 
+/*
 // Prompt the user for the input
 prompt<Command>([
     input('PLACE', 'Enter place coordinates (x,y): '),
@@ -27,5 +31,5 @@ prompt<Command>([
         console.log(`${command} is not a valid postive whole number. Fractions are not allowed.`);
     }
   });
-
+*/
 export  { Robot };

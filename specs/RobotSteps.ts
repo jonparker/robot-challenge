@@ -8,59 +8,44 @@ export interface RobotContext {
 }
 
 export class DeliveryFeeCalculatorSteps {
-	@given(/^I am using the delivery fee calculator$/i)
+	@given(/^I am running the toy robot simulator$/i)
 	usingARobot(context: RobotContext) {
 		context.robot = new Robot();
 		context.commands = [];
 	}
 
-	@given(/^I have entered (\d+)kg as the weight$/i)
-	passingWeight(context: RobotContext, weight: number) {
-		context.commands.push('(0,0)');
-	}
-
-	@given(/^I have entered -(\d+)kg as the weight$/i)
-	passingNegativeWeight(context: RobotContext, weight: number) {
-		context.commands.push('(0,0)');
-    }
-    
-    @given(/^I have entered (\d+)cm as the height$/i)
-	passingHeight(context: RobotContext, height: number) {
-        context.commands.push('(0,0)');
-	}
-		
-	@given(/^I have entered -(\d+)cm as the height$/i)
-	passingNegativeHeight(context: RobotContext, height: number) {
-        context.commands.push('(0,0)');
+	@given(/^I have entered the PLACE(\d,\d) command$/i)
+	placeCommand(context: RobotContext, x: number, y: number) {
+        context.commands.push(`(${x}, ${y})`);
     }
 
-    @given(/^I have entered (\d+)cm as the width$/i)
-	passingWidth(context: RobotContext, width: number) {
-		context.commands.push('(0,0)');
+    @given(/^I have entered the PLACE\[(\d),(\d),(.+)\] command$/i)
+	placeWithDirectionCommand(context: RobotContext, x: number, y: number, direction: string) {
+        context.commands.push(`(${x}, ${y}, ${direction})`);
+    }
+
+    @given(/^I have entered the MOVE command$/i)
+	moveCommand(context: RobotContext) {
+		context.commands.push('MOVE');
 	}
-	
-	@given(/^I have entered -(\d+)cm as the width$/i)
-	passingNegativeWidth(context: RobotContext, width: number) {
-		context.commands.push('(0,0)');
-    	}
+
+	@given(/^I have entered the LEFT command$/i)
+	rotateLeftCommand(context: RobotContext) {
+		context.commands.push('LEFT');
+    }
     
-    	@given(/^I have entered (\d+)cm as the depth$/i)
-	passingDepth(context: RobotContext, depth: number) {
-		context.commands.push('(0,0)');
-	}
+    @given(/^I have entered the RIGHT command$/i)
+	rotateRightCommand(context: RobotContext) {
+		context.commands.push('RIGHT');
+    }
 
-	@given(/^I have entered -(\d+)cm as the depth$/i)
-	passingNegativeDepth(context: RobotContext, depth: number) {
-		context.commands.push('(0,0)');
-	}
-
-	@when(/^I make the calculation$/gi)
+	@when(/^I run the REPORT command$/gi)
 	makeCalculation(context: RobotContext) {
-        context.actual = context.robot.location;
+        context.actual = context.robot.Report();
 	}
 
-	@then(/^the delivery fee should be \$-1$/i)
-	resultShouldBeNegativeOne(context: RobotContext) {
-		Assert.isTrue(context.actual === "(0,0)");
+	@then(/^the robot should output (.+)$/i)
+	verifyReportOutput(context: RobotContext, expectedReport: string) {
+        Assert.isTrue(context.actual === expectedReport);
 	}
 }
