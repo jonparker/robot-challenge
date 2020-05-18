@@ -6,8 +6,8 @@
   "scripts": {
     "test": "test",
     "build": "tsc",
-    "lint": "tslint .",
-    "start": "npm  run-script lint && npm run-script build && node index.js"
+    "lint": "tslint --project tslint.json",
+    "start": "npm run-script build && node src/index.js"
   },
   "repository": {
     "type": "git",
