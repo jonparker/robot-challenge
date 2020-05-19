@@ -1,8 +1,7 @@
 import { Assert, given, when, then } from 'typespec-bdd';
-import { Robot } from '../src/index';
+import { Robot } from '../src/Robot';
 
 export interface RobotContext {
-    robot: Robot;
     commands: string[]
     actual: string
 }
@@ -10,16 +9,16 @@ export interface RobotContext {
 export class DeliveryFeeCalculatorSteps {
 	@given(/^I am running the toy robot simulator$/i)
 	usingARobot(context: RobotContext) {
-		context.robot = new Robot();
+		//context.robot = Robot();
 		context.commands = [];
 	}
 
-	@given(/^I have entered the PLACE(\d,\d) command$/i)
+	@given(/^I have entered the PLACE \d,\d command$/i)
 	placeCommand(context: RobotContext, x: number, y: number) {
         context.commands.push(`(${x}, ${y})`);
     }
 
-    @given(/^I have entered the PLACE\[(\d),(\d),(.+)\] command$/i)
+    @given(/^I have entered the PLACE \d,\d,(.+) command$/i)
 	placeWithDirectionCommand(context: RobotContext, x: number, y: number, direction: string) {
         context.commands.push(`(${x}, ${y}, ${direction})`);
     }
@@ -41,7 +40,7 @@ export class DeliveryFeeCalculatorSteps {
 
 	@when(/^I run the REPORT command$/gi)
 	makeCalculation(context: RobotContext) {
-        context.actual = context.robot.Report();
+        //context.actual = context.robot.Report();
 	}
 
 	@then(/^the robot should output (.+)$/i)

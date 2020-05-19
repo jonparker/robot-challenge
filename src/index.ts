@@ -1,35 +1,18 @@
-import { prompt, list, input } from 'typed-prompts'
-import { Command } from './Command';
+import { Robot, Direction } from './Robot';
 
-class Robot {
-    location: string;
-    Report() {
-        return this.location;
-    }
-    constructor() {
-        this.location = "(0,0)";
+class Runner {
+
+    public run() {
+        const stdin = process.openStdin();
+        stdin.addListener("data", d => {
+            console.log("you entered: [" + d.toString().trim() + "]");
+            const command = d.toString().trim();
+            const robot = Robot([], { x: 1, y: 1, direction: Direction.Left});
+            const next = Robot(robot, { x: 5, y: 2, direction: Direction.Left});
+
+            console.log(next);
+        });
     }
 }
 
-
-//let foo = new Robot();
-//console.log(foo.location);
-
-/*
-// Prompt the user for the input
-prompt<Command>([
-    input('PLACE', 'Enter place coordinates (x,y): '),
-    input('MOVE', 'Enter move '),
-    input('LEFT', 'Enter Width in cm: '),
-    input('RIGHT', 'Enter Depth in cm: '),
-    input('REPORT', 'Enter Depth in cm: ')
-  ])
-  .then((inputs) => {
-
-    for (const command of [ inputs.place, inputs.move, inputs.left, inputs.right, inputs.report])
-    {
-        console.log(`${command} is not a valid postive whole number. Fractions are not allowed.`);
-    }
-  });
-*/
-export  { Robot };
+new Runner().run();

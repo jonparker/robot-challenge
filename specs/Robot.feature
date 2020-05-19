@@ -6,7 +6,7 @@ Feature: Toy Robot Simulator
     @passing
     Scenario Outline: Various command combinations
         Given I am running the toy robot simulator
-        And I have entered the PLACE[1,1,NORTH] command
+        And I have entered the PLACE <X>,<Y>,<Direction> command
         And I have entered the MOVE command
         And I have entered the <Rotate> command
         When I run the REPORT command
@@ -14,4 +14,4 @@ Feature: Toy Robot Simulator
 
     Examples:
         | X  | Y  | Direction  | Rotate    | Result
-        | 1   | 1  | SOUTH    | LEFT     | [1,1,NORTH]
+        | 1   | 1  | SOUTH    | LEFT     | 1,1,NORTH
