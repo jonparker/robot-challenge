@@ -3,6 +3,10 @@ import { Robot, Direction, MoveCommand, DirectionCommand, PlaceCommand, ReportCo
 class Runner {
 
     public run() {
+        let robot = Robot([], { x: 1, y: 1, direction: Direction.Left })
+        console.log('Initial position:')
+        console.log(robot)
+        
         const stdin = process.openStdin()
         stdin.addListener("data", d => {
 
@@ -15,15 +19,10 @@ class Runner {
 
             console.log(`Point ${direction == Direction.Left ? 'Left' : 'Right'} and move ${amount}`)
 
-            
-            const robot = Robot([], { x: 1, y: 1, direction: Direction.Left })
-            console.log('Initial position:')
-            console.log(robot)
-
-            const next = Robot(robot, <MoveCommand>{ direction: direction, moves: amount })
+            robot = Robot(robot, <MoveCommand>{ direction: direction, moves: amount })
             
             console.log('Next position:')
-            console.log(next)
+            console.log(robot)
         });
     }
 }

@@ -16,11 +16,7 @@ type ReportCommand = {}
 type Command = PlaceCommand | FirstPlaceCommand | DirectionCommand | MoveCommand | ReportCommand
 
 function Robot<T extends Command>(commands: T[], command: T): Command[] {
-    const isvalid = isCommandValid(command)
-    console.log(isvalid)
-    if (isvalid)
-        return [...commands, command]
-    return commands
+    return [...commands, command]
 }
 
 const isCommandValid = (cmd: Command) : boolean => {
