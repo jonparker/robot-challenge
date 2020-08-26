@@ -1,18 +1,31 @@
-import { Robot, Direction } from './Robot';
+import { Robot, Direction, MoveCommand, DirectionCommand, PlaceCommand, ReportCommand } from './Robot'
 
 class Runner {
 
     public run() {
-        const stdin = process.openStdin();
+        const stdin = process.openStdin()
         stdin.addListener("data", d => {
-            console.log("you entered: [" + d.toString().trim() + "]");
-            const command = d.toString().trim();
-            const robot = Robot([], { x: 1, y: 1, direction: Direction.Left});
-            const next = Robot(robot, { x: 5, y: 2, direction: Direction.Left});
 
-            console.log(next);
+            console.log("You entered: [" + d.toString().trim() + "]")
+            const command = d.toString().trim()
+            const tokens = command.split(' ')
+            const directionToken = tokens[0].toLowerCase()
+            const direction = directionToken == 'r' ? Direction.Right : Direction.Left
+            const amount = +tokens[1];
+
+            console.log(`Point ${direction == Direction.Left ? 'Left' : 'Right'} and move ${amount}`)
+
+            
+            const robot = Robot([], { x: 1, y: 1, direction: Direction.Left })
+            console.log('Initial position:')
+            console.log(robot)
+
+            const next = Robot(robot, <MoveCommand>{ direction: direction, moves: amount })
+            
+            console.log('Next position:')
+            console.log(next)
         });
     }
 }
 
-new Runner().run();
+new Runner().run()
