@@ -1,4 +1,4 @@
-import { Robot, Direction, MoveCommand, DirectionCommand, PlaceCommand, ReportCommand } from './Robot'
+import { Robot, Direction, MoveCommand, Curry } from './Robot'
 
 class Runner {
 
@@ -9,6 +9,8 @@ class Runner {
         
         const stdin = process.openStdin()
         stdin.addListener("data", d => {
+
+            Curry()
 
             console.log("You entered: [" + d.toString().trim() + "]")
             const command = d.toString().trim()

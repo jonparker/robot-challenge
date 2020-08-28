@@ -1,60 +1,72 @@
-import * as E from 'fp-ts/lib/Either';
-import * as R from 'ramda';
+    import * as E from 'fp-ts/lib/Either';
+    import * as R from 'ramda';
 
 
-enum Direction {
-    Left,
-    Right
-}
-
-type DirectionCommand = { direction: Direction }
-
-type PlaceCommand = { x: number, y: number }
-
-type FirstPlaceCommand =  { x: number, y: number, direction: Direction }
-
-type MoveCommand = { direction: Direction, moves: number }
-
-type ReportCommand = {}
-
-type Command = PlaceCommand | FirstPlaceCommand | DirectionCommand | MoveCommand | ReportCommand
-
-function Robot<T extends Command>(commands: T[], command: T): Command[] {
-    
-    const {identity} = R
-    R.map(identity, [1, 2, 3])
-    E.fold((e) => console.log(e), (d) => console.log(d))
-    
-    return [...commands, command]
-}
-
-const isCommandValid = (cmd: Command) : boolean => {
-    if (cmd as FirstPlaceCommand) {
-        console.log(1); return isFirstPlaceCommandValid(cmd as FirstPlaceCommand)
+    enum Direction {
+        Left,
+        Right
     }
-    if (cmd as MoveCommand) {
-        console.log(2); return isMoveCommandValid(cmd as MoveCommand)
+
+    type DirectionCommand = { direction: Direction }
+
+    type PlaceCommand = { x: number, y: number }
+
+    type FirstPlaceCommand =  { x: number, y: number, direction: Direction }
+
+    type MoveCommand = { direction: Direction, moves: number }
+
+    type ReportCommand = {}
+
+    type Command = PlaceCommand | FirstPlaceCommand | DirectionCommand | MoveCommand | ReportCommand
+
+    function Calc(base: number, tax: number, fees: number) {
+        return base + (tax * base/100) + fees;
     }
-    if (cmd as PlaceCommand) {
-        console.log(3); return isPlaceCommandValid(cmd as PlaceCommand)
+
+    function Curry() {
+        const foo = R.curry(Calc);
+        const bar = foo(3);
+        const baz = bar(4);
+        const fiz = baz(2);
+        console.log(fiz);
     }
-    if (cmd as DirectionCommand) {
-        console.log(4); return isDirectionCommandValid(cmd as MoveCommand)
+
+    function Robot<T extends Command>(commands: T[], command: T): Command[] {
+        
+        const {identity} = R
+        R.map(identity, [1, 2, 3])
+        E.fold((e) => console.log(e), (d) => console.log(d))
+        
+        return [...commands, command]
     }
-    if (cmd as ReportCommand)
-        return isReportCommandValid(cmd as ReportCommand)
-    return false
-}
 
-const isPlaceCommandValid = (cmd: PlaceCommand) : boolean =>
-    cmd.x > -1 && cmd.x < 6 && cmd.y > -1 && cmd.y < 6
+    const isCommandValid = (cmd: Command) : boolean => {
+        if (cmd as FirstPlaceCommand) {
+            console.log(1); return isFirstPlaceCommandValid(cmd as FirstPlaceCommand)
+        }
+        if (cmd as MoveCommand) {
+            console.log(2); return isMoveCommandValid(cmd as MoveCommand)
+        }
+        if (cmd as PlaceCommand) {
+            console.log(3); return isPlaceCommandValid(cmd as PlaceCommand)
+        }
+        if (cmd as DirectionCommand) {
+            console.log(4); return isDirectionCommandValid(cmd as MoveCommand)
+        }
+        if (cmd as ReportCommand)
+            return isReportCommandValid(cmd as ReportCommand)
+        return false
+    }
 
-const isMoveCommandValid = (cmd: MoveCommand) : boolean => cmd.moves > 0
+    const isPlaceCommandValid = (cmd: PlaceCommand) : boolean =>
+        cmd.x > -1 && cmd.x < 6 && cmd.y > -1 && cmd.y < 6
 
-const isFirstPlaceCommandValid = (cmd: FirstPlaceCommand) : boolean => isPlaceCommandValid({ x: cmd.x, y: cmd.y})
+    const isMoveCommandValid = (cmd: MoveCommand) : boolean => cmd.moves > 0
 
-const isReportCommandValid = (cmd: ReportCommand) : boolean => true
+    const isFirstPlaceCommandValid = (cmd: FirstPlaceCommand) : boolean => isPlaceCommandValid({ x: cmd.x, y: cmd.y})
 
-const isDirectionCommandValid = (cmd: DirectionCommand) : boolean => cmd.direction == Direction.Left || cmd.direction == Direction.Right;
+    const isReportCommandValid = (cmd: ReportCommand) : boolean => true
 
-export { Robot, Direction, MoveCommand, PlaceCommand, DirectionCommand, ReportCommand }
+    const isDirectionCommandValid = (cmd: DirectionCommand) : boolean => cmd.direction == Direction.Left || cmd.direction == Direction.Right;
+
+    export { Curry, Robot, Direction, MoveCommand, PlaceCommand, DirectionCommand, ReportCommand }
