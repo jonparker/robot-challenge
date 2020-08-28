@@ -31,7 +31,9 @@
     "typespec-bdd": "^2.0.1"
   },
   "dependencies": {
+    "@types/ramda": "^0.27.14",
     "fp-ts": "^2.8.2",
+    "ramda": "^0.27.1",
     "typed-prompts": "^1.5.0"
   }
 }

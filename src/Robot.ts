@@ -1,3 +1,7 @@
+import * as E from 'fp-ts/lib/Either';
+import * as R from 'ramda';
+
+
 enum Direction {
     Left,
     Right
@@ -16,6 +20,11 @@ type ReportCommand = {}
 type Command = PlaceCommand | FirstPlaceCommand | DirectionCommand | MoveCommand | ReportCommand
 
 function Robot<T extends Command>(commands: T[], command: T): Command[] {
+    
+    const {identity} = R
+    R.map(identity, [1, 2, 3])
+    E.fold((e) => console.log(e), (d) => console.log(d))
+    
     return [...commands, command]
 }
 
