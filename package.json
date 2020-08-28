@@ -31,6 +31,7 @@
     "typespec-bdd": "^2.0.1"
   },
   "dependencies": {
+    "fp-ts": "^2.8.2",
     "typed-prompts": "^1.5.0"
   }
 }
