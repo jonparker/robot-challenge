@@ -1,72 +1,122 @@
-    import * as E from 'fp-ts/lib/Either';
-    import * as R from 'ramda';
+import * as E from 'fp-ts/lib/Either';
+import * as R from 'ramda';
 
+export namespace RobotControl {
 
-    enum Direction {
-        Left,
-        Right
-    }
+    // Grid boundaries
+    const minX = 0, minY = 0, maxX = 99, maxY = 99;
 
-    type DirectionCommand = { direction: Direction }
+    // Movement function definitions
+    type Increment = (num: number) => number;
+    type Decrement = (num: number) => number;
 
-    type PlaceCommand = { x: number, y: number }
+    // Move in X coordinates
+    let incrementX: Increment = x => x == maxX ? minX : x + 1;
+    let decrementX: Decrement = x => x == minX ? maxX : x - 1;
 
-    type FirstPlaceCommand =  { x: number, y: number, direction: Direction }
+    // Move in Y coordinates
+    let incrementY: Increment = y => y == maxY ? minY : y + 1;
+    let decrementY: Decrement = y => y == minY ? maxY : y - 1;
 
-    type MoveCommand = { direction: Direction, moves: number }
+    // Directions & Compass definitions
+    type Direction = 'Left' | 'Right';
+    type CompassReading = 'N' | 'S' | 'E' | 'W';
 
-    type ReportCommand = {}
+    type rotateMap = { [key in CompassReading] : (directionToMove: Direction) => CompassReading };
 
-    type Command = PlaceCommand | FirstPlaceCommand | DirectionCommand | MoveCommand | ReportCommand
+    // Rotation mappings
+    const rotateMappings: rotateMap = {
+        'N': (directionToRotate) => directionToRotate == 'Left' ? 'W' : 'E',
+        'S': (directionToRotate) => directionToRotate == 'Left' ? 'E' : 'W',
+        'E': (directionToRotate) => directionToRotate == 'Left' ? 'N' : 'S',
+        'W': (directionToRotate) => directionToRotate == 'Left' ? 'S' : 'N'
+    };
 
-    function Calc(base: number, tax: number, fees: number) {
-        return base + (tax * base/100) + fees;
-    }
+    // Robot Location
+    export interface Location { orientation: CompassReading, x: number, y: number };
 
-    function Curry() {
-        const foo = R.curry(Calc);
-        const bar = foo(3);
-        const baz = bar(4);
-        const fiz = baz(2);
-        console.log(fiz);
-    }
+    // Robot command type
+    export type CommandType = 'M' | 'L' | 'R';
 
-    function Robot<T extends Command>(commands: T[], command: T): Command[] {
-        
-        const {identity} = R
-        R.map(identity, [1, 2, 3])
-        E.fold((e) => console.log(e), (d) => console.log(d))
-        
-        return [...commands, command]
-    }
+    // Robot move command
+    export type MoveCommand = { type: CommandType, repeat: number }
 
-    const isCommandValid = (cmd: Command) : boolean => {
-        if (cmd as FirstPlaceCommand) {
-            console.log(1); return isFirstPlaceCommandValid(cmd as FirstPlaceCommand)
+    // Take the current location of the robot and a list of commands and return the final location of the robot
+    type RunRobot = (currentLocation: Location, command: MoveCommand[]) => Location;
+
+    type MoveNPostiions = (currentLocation: Location, repeat: number) => Location;
+
+    type MovementMap = { [key in CommandType]: MoveNPostiions };
+
+    type MoveSteps = (movementMap: MovementMap, currentLocation: Location, command: MoveCommand) => Location;
+
+    const movementMap: MovementMap = {
+        'L': (currentLocation, repeat) => {
+            const newLocation = { ...currentLocation, orientation: rotateMappings[currentLocation.orientation]("Left") };
+            return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'L', repeat: repeat - 1 });
+        },
+        'R': (currentLocation, repeat) => {
+            const newLocation = { ...currentLocation, orientation: rotateMappings[currentLocation.orientation]("Right") };
+            return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'R', repeat: repeat - 1 });
+        },
+        'M': (currentLocation, repeat) => {
+            let newLocation: Location;
+            switch (currentLocation.orientation) {
+                case 'N':
+                    newLocation = { ...currentLocation, y: incrementY(currentLocation.y) };
+                    break;
+                case 'S':
+                    newLocation = { ...currentLocation, y: decrementY(currentLocation.y) };
+                    break;
+                case 'E':
+                    newLocation = { ...currentLocation, x: incrementX(currentLocation.x) };
+                    break;
+                case 'W':
+                    newLocation = { ...currentLocation, x: decrementX(currentLocation.x) };
+                    break;
+                default:
+                    newLocation = currentLocation;
+                    break;
+            }
+            return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'M', repeat: repeat - 1 });
         }
-        if (cmd as MoveCommand) {
-            console.log(2); return isMoveCommandValid(cmd as MoveCommand)
-        }
-        if (cmd as PlaceCommand) {
-            console.log(3); return isPlaceCommandValid(cmd as PlaceCommand)
-        }
-        if (cmd as DirectionCommand) {
-            console.log(4); return isDirectionCommandValid(cmd as MoveCommand)
-        }
-        if (cmd as ReportCommand)
-            return isReportCommandValid(cmd as ReportCommand)
-        return false
-    }
+    };
 
-    const isPlaceCommandValid = (cmd: PlaceCommand) : boolean =>
-        cmd.x > -1 && cmd.x < 6 && cmd.y > -1 && cmd.y < 6
+    const move: MoveSteps = (movementMap, currentLocation, command) => {
+        return movementMap[command.type](currentLocation, command.repeat);
+    };
 
-    const isMoveCommandValid = (cmd: MoveCommand) : boolean => cmd.moves > 0
+    export const Robot: RunRobot = (currentLocation, [firstCommand, ...restOfCommands]) => restOfCommands.length ?
+        Robot(move(movementMap, currentLocation, firstCommand), restOfCommands) : 
+        move(movementMap, currentLocation, firstCommand);
 
-    const isFirstPlaceCommandValid = (cmd: FirstPlaceCommand) : boolean => isPlaceCommandValid({ x: cmd.x, y: cmd.y})
+    // // Examples
+    // const initialLocation: Location = { orientation: 'N', x: 0, y: 0 };
+    // const commandList: MoveCommand[] = [{ type: 'M', repeat: 1}];
 
-    const isReportCommandValid = (cmd: ReportCommand) : boolean => true
+    // console.log(`Initial location: ${JSON.stringify(initialLocation)}`);
+    // const finalLocation = Robot(initialLocation, commandList);
+    // console.log(`Commands: ${JSON.stringify(commandList)}`);
+    // console.log(`Final location: ${JSON.stringify(finalLocation)}`);
 
-    const isDirectionCommandValid = (cmd: DirectionCommand) : boolean => cmd.direction == Direction.Left || cmd.direction == Direction.Right;
+    // const initialLocation2: Location = { orientation: 'N', x: 0, y: 0 };
+    // const commandList2: MoveCommand[] = [
+    //     { type: 'M', repeat: 1},
+    //     { type: 'R', repeat: 1 },
+    //     { type: 'M', repeat: 4},
+    //     { type: 'L', repeat: 3},
+    //     { type: 'M', repeat: 2}
+    // ];
 
-    export { Curry, Robot, Direction, MoveCommand, PlaceCommand, DirectionCommand, ReportCommand }
+    // console.log(`Initial location: ${JSON.stringify(initialLocation2)}`);
+    // const finalLocation2 = Robot(initialLocation2, commandList2);
+    // console.log(`Commands: ${JSON.stringify(commandList2)}`);
+    // console.log(`Final location: ${JSON.stringify(finalLocation2)}`);
+
+    // // Answer to example:
+    // // Orientation: S, x: 4, y: 99
+    // const expectedFinalLocation = { orientation: 'S', x: 4, y: 99 };
+    // const result = finalLocation2.orientation == expectedFinalLocation.orientation && finalLocation2.x == expectedFinalLocation.x && 
+    //     finalLocation2.y == expectedFinalLocation.y;
+    // console.log(`Test result: ${result ? 'Pass' : 'Fail'}`);
+}

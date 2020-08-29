@@ -1,5 +1,5 @@
 import { Assert, given, when, then } from 'typespec-bdd';
-import { Robot } from '../src/Robot';
+import { RobotControl } from '../src/Robot';
 
 export interface RobotContext {
     commands: string[]
@@ -40,7 +40,7 @@ export class DeliveryFeeCalculatorSteps {
 
 	@when(/^I run the REPORT command$/gi)
 	makeCalculation(context: RobotContext) {
-        context.actual = Robot(context.commands).Report();
+		//context.actual = RobotControl.Robot(context.commands).Report();
 	}
 
 	@then(/^the robot should output (.+)$/i)
