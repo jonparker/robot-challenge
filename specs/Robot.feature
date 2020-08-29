@@ -14,4 +14,4 @@ Feature: Toy Robot Simulator
 
     Examples:
         | X  | Y  | Direction  | Rotate    | Result
-        | 1   | 1  | SOUTH    | LEFT     | 1,1,NORTH
+        | 1  | 1  | SOUTH      | LEFT      | 1,1,NORTH
