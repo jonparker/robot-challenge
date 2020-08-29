@@ -40,7 +40,7 @@ export class DeliveryFeeCalculatorSteps {
 
 	@when(/^I run the REPORT command$/gi)
 	makeCalculation(context: RobotContext) {
-        //context.actual = context.robot.Report();
+        context.actual = Robot(context.commands).Report();
 	}
 
 	@then(/^the robot should output (.+)$/i)
