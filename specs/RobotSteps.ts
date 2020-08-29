@@ -11,16 +11,11 @@ export interface RobotContext {
 	parseRepeat: (command: string) => number;
 }
 
-export class DeliveryFeeCalculatorSteps {
+export class RobotScenarioSteps {
 
 	@given(/^I am running the toy robot simulator$/i)
 	usingARobot(context: RobotContext) {
-		context.parseRepeat = (command: string) => {
-			if (command.length == 1){
-				return 1;
-			}
-			return Number.parseInt(command.substring(1));
-		};
+		context.parseRepeat = (command: string) => command.length == 1 ? 1 : Number.parseInt(command.substring(1));
 		context.commands = [];
 	}
 
