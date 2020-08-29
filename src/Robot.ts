@@ -17,7 +17,7 @@ export namespace RobotControl {
 
     // Directions & Compass definitions
     type Direction = 'Left' | 'Right';
-    type CompassReading = 'N' | 'S' | 'E' | 'W';
+    export type CompassReading = 'N' | 'S' | 'E' | 'W';
 
     type rotateMap = { [key in CompassReading] : (directionToMove: Direction) => CompassReading };
 
@@ -34,6 +34,27 @@ export namespace RobotControl {
 
     // Robot command type
     export type CommandType = 'M' | 'L' | 'R';
+
+
+    // Helper for parsing command type
+    export function parseCommandType(command: string): CommandType {
+        const commandTypeStr = command.toUpperCase();
+        let commandType: RobotControl.CommandType;
+        switch (commandTypeStr) {
+            case 'L':
+                commandType = 'L';
+                break;
+            case 'R':
+                commandType = 'R';
+                break;
+            case 'M':
+                commandType = 'M';
+                break;
+            default:
+                throw Error('Invalid command type');
+        }
+        return commandType;
+    }
 
     // Robot move command
     export type MoveCommand = { type: CommandType, repeat: number }

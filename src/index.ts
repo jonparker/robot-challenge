@@ -20,27 +20,8 @@ class Runner {
             {
                 console.log(`You entered an invalid number ${enteredRepeatStr}. 1 will be used instead.`);
             }
-            
-            const commandTypeStr = command[0].toUpperCase();
-            let commandType: RobotControl.CommandType;
-
-            switch (commandTypeStr) {
-                case 'L':
-                    commandType = 'L';
-                    break;
-                case 'R':
-                    commandType = 'R';
-                    break;
-                case 'M':
-                    commandType = 'M';
-                    break;
-                default:
-                    console.log(`Invalid command type: ${commandTypeStr}`);
-                    return;
-            }
-            
             const initialLocation: RobotControl.Location = { orientation: 'N', x: 0, y: 0 };
-            const commands: RobotControl.MoveCommand[] = [{ type: commandType, repeat: repeat }];
+            const commands: RobotControl.MoveCommand[] = [{ type: RobotControl.parseCommandType(command[0]), repeat: repeat }];
 
             console.log('Initial location:')
             console.log(JSON.stringify(initialLocation));

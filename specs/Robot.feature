@@ -6,12 +6,13 @@ Feature: Toy Robot Simulator
     @passing
     Scenario Outline: Various command combinations
         Given I am running the toy robot simulator
-        And I have entered the PLACE <X>,<Y>,<Direction> command
-        And I have entered the MOVE command
-        And I have entered the <Rotate> command
-        When I run the REPORT command
-        Then the robot should output <Result>
+        And I have set the initial location as "<X>", "<Y>", N
+        And I have entered the 1st "<First>" command
+        And I have entered the 2nd "<Second>" command
+        And I have entered the 3rd "<Third>" command
+        When I run the robot
+        Then the output should be <ExpectedX>,<ExpectedY>,<ExpectedDirection>
 
     Examples:
-        | X  | Y  | Direction  | Rotate    | Result
-        | 1  | 1  | SOUTH      | LEFT      | 1,1,NORTH
+        | X  | Y  | Direction | First | Second | Third | ExpectedX | ExpectedY | ExpectedDirection
+        | 0  | 0  | N         | M1    | R1     | M4    | 4         | 1         | E
