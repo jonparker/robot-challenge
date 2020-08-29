@@ -1,9 +1,10 @@
+import { Examples } from './Examples';
 import { RobotControl } from './Robot'
-// import * as E from 'fp-ts/lib/Either'
-// import * as R from 'ramda'
 
 class Runner {
     public run() {
+
+        new Examples().run();
         console.info("Enter commands (e.g. R4, M3, L):");
         const stdin = process.openStdin();
 
