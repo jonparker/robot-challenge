@@ -1,7 +1,5 @@
 # Robot Control
 
-Robot Control
-
 ## Instructions
 
 1. `npm i`
