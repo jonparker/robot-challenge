@@ -1,6 +1,6 @@
-# Toy Robot Simulator
+# Robot Control
 
-Toy Robot Simulator
+Robot Control
 
 ## Instructions
 
