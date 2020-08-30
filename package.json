@@ -1,7 +1,7 @@
 {
-  "name": "toyrobot",
+  "name": "robotcontrol",
   "version": "1.0.0",
-  "description": "Toy Robot Simulator",
+  "description": "Robot Control",
   "main": "index.js",
   "scripts": {
     "test": "npm run-script build && node specs/specs.js",
@@ -9,21 +9,12 @@
     "lint": "tslint --project tslint.json",
     "start": "npm run-script build && node src/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jonparker/toyrobot.git"
-  },
   "keywords": [
-    "Toy",
     "Robot",
-    "Simulator"
+    "Control"
   ],
   "author": "Jonathan Parker",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/jonparker/toyrobot/issues"
-  },
-  "homepage": "https://github.com/jonparker/toyrobot#readme",
   "devDependencies": {
     "@types/node": "^14.0.1",
     "eslint": "^7.0.0",
@@ -37,6 +28,7 @@
     "@types/ramda": "^0.27.14",
     "fp-ts": "^2.8.2",
     "line-reader": "^0.4.0",
+    "lodash": "^4.17.20",
     "n-readlines": "^1.0.0",
     "ramda": "^0.27.1",
     "typed-prompts": "^1.5.0"

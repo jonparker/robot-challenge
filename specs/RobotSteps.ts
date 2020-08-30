@@ -13,7 +13,7 @@ export interface RobotContext {
 
 export class RobotScenarioSteps {
 
-	@given(/^I am running the toy robot simulator$/i)
+	@given(/^I am running the robot controller$/i)
 	usingARobot(context: RobotContext) {
 		context.parseRepeat = (command: string) => command.length == 1 ? 1 : Number.parseInt(command.substring(1));
 		context.commands = [];
@@ -36,8 +36,8 @@ export class RobotScenarioSteps {
 
 	@then(/^the output should be (\d+),(\d+),(.*)$/i)
 	verifyOutput(context: RobotContext, x: number, y: number, orientation: string) {
-		Assert.isTrue(x == context.actualFinalLocation.x);
-		Assert.isTrue(y == context.actualFinalLocation.y);
+		Assert.isTrue(x == context.actualFinalLocation.x, `x: ${x} was expected but got ${context.actualFinalLocation.x}`);
+		Assert.isTrue(y == context.actualFinalLocation.y, `y: ${y} was expected but got ${context.actualFinalLocation.y}`);
 		Assert.isTrue(orientation == context.actualFinalLocation.orientation);
 	}
 }
