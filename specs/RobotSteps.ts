@@ -24,7 +24,7 @@ export class RobotScenarioSteps {
 		context.commands[commandNumber-1] = { type: RobotControl.parseCommandType(command[0]) , repeat: context.parseRepeat(command) };
 	}
 
-	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (.+)$/i)
+	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (\".+\")$/i)
 	initialLocationCommand(context: RobotContext, x: number, y: number, direction: RobotControl.CompassReading) {
 		context.initialLocation = { orientation: direction, x, y };
     }
@@ -38,6 +38,7 @@ export class RobotScenarioSteps {
 	verifyOutput(context: RobotContext, x: number, y: number, orientation: string) {
 		Assert.isTrue(x == context.actualFinalLocation.x, `x: ${x} was expected but got ${context.actualFinalLocation.x}`);
 		Assert.isTrue(y == context.actualFinalLocation.y, `y: ${y} was expected but got ${context.actualFinalLocation.y}`);
-		Assert.isTrue(orientation == context.actualFinalLocation.orientation);
+		Assert.isTrue(orientation == context.actualFinalLocation.orientation, 
+			`orientation: ${orientation} was expected but got ${context.actualFinalLocation.orientation}`);
 	}
 }
