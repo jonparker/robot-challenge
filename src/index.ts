@@ -45,44 +45,35 @@ import { argv } from 'process';
 
         const initialLocation: RobotControl.Location = { x, y, orientation: initialDirection};
         const isCommandChar = (char?:string): boolean => char == 'L' || char == 'R' || char == 'M';
-        const commandList: RobotControl.MoveCommand[] = [];
-        const commandStack: string[] = [];
-        const digitStack: number[] = [];
-
-        for(const char of commandsStr) {
-            if (isCommandChar(char))
-            {
-                if (commandStack.length || digitStack.length)
-                {
-                    if (digitStack.length)
-                    {
-                        const lastDigit = digitStack.pop() || 0;
-                        const repeat = digitStack.length ? 
-                            (10 * (digitStack.pop() || 0)) + lastDigit :
-                            lastDigit;
-                        commandList.push({ type: RobotControl.parseCommandType(commandStack.pop() || ''), repeat });
-                    }
-                    else {
-                        commandList.push({ type: RobotControl.parseCommandType(commandStack.pop() || ''), repeat: 1 })
-                    }
-                }
-                commandStack.push(char);
-            }
-            else {
-                digitStack.push(Number.parseInt(char));
-            }
-        }
-        if (digitStack.length)
-        {
-            const lastDigit = digitStack.pop() || 0;
-            const repeat = digitStack.length ? 
-                (10 * (digitStack.pop() || 0)) + lastDigit :
-                lastDigit;
-            commandList.push({ type: RobotControl.parseCommandType(commandStack.pop() || ''), repeat});
-        }
-
-        const finalLocation = RobotControl.Robot(initialLocation, commandList);
         
+        type commandInfo = { command: string, firstDigit: number, secondDigit: number };
+
+        const commandList = commandsStr
+            .split('')
+            .reduce((commandList: commandInfo[], char: string): commandInfo[] =>
+            {
+                if (isCommandChar(char))
+                    return [...commandList, { command: char, firstDigit: -1, secondDigit: -1 }];
+                
+                const digit = Number.parseInt(char);
+                const previousCommands = [...commandList];
+                previousCommands.pop();
+                const lastCommand = commandList[commandList.length - 1];
+                const firstDigit = lastCommand?.firstDigit > 0 ? lastCommand.firstDigit : digit;
+                const secondDigit = lastCommand?.firstDigit > 0 ? digit : -1;
+                
+                return [...previousCommands, { ...lastCommand, firstDigit, secondDigit }];
+            },
+            [] as commandInfo[]
+        ).map(cmd => {
+            const hasFirstDigit = cmd.firstDigit > -1;
+            const hasSecondDigit = cmd.secondDigit > -1;
+            const repeat = !hasFirstDigit && !hasSecondDigit ? 1 :
+                (!hasSecondDigit ? cmd.firstDigit : (10 * cmd.firstDigit) + cmd.secondDigit);
+            return { type: RobotControl.parseCommandType(cmd.command), repeat };
+        });
+        
+        const finalLocation = RobotControl.Robot(initialLocation, commandList);
         console.log(`Final location: ${finalLocation.orientation} ${finalLocation.x} ${finalLocation.y}`);
     });
 })();
