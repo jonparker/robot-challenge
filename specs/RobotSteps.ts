@@ -26,7 +26,7 @@ export class RobotScenarioSteps {
 
 	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (\".+\")$/i)
 	initialLocationCommand(context: RobotContext, x: number, y: number, direction: RobotControl.CompassReading) {
-		context.initialLocation = { orientation: direction, x, y };
+		context.initialLocation = { orientation: direction, x, y, portals: {} };
     }
 
     @when(/^I run the robot$/gi)

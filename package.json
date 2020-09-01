@@ -19,7 +19,7 @@
     "@types/node": "^14.0.1",
     "eslint": "^7.0.0",
     "ts-node": "^3.2.2",
-    "typescript": "^4.0.2",
+    "typescript": "^3.9.7",
     "typespec-bdd": "^2.0.1"
   },
   "dependencies": {

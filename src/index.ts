@@ -43,8 +43,8 @@ import { argv } from 'process';
             throw Error(`Invalid initial location ${xStr} ${yStr}`);
         }
 
-        const initialLocation: RobotControl.Location = { x, y, orientation: initialDirection};
-        const isCommandChar = (char?:string): boolean => char == 'L' || char == 'R' || char == 'M';
+        const initialLocation: RobotControl.Location = { x, y, orientation: initialDirection, portals: {} };
+        const isCommandChar = (char?:string): boolean => char == 'L' || char == 'R' || char == 'M' || char == 'B' || char == 'O';
         
         type commandInfo = { command: string, firstDigit: number, secondDigit: number };
 
@@ -72,6 +72,8 @@ import { argv } from 'process';
                 (!hasSecondDigit ? cmd.firstDigit : (10 * cmd.firstDigit) + cmd.secondDigit);
             return { type: RobotControl.parseCommandType(cmd.command), repeat };
         });
+
+        //console.log(JSON.stringify(commandList));
         
         const finalLocation = RobotControl.Robot(initialLocation, commandList);
         console.log(`Final location: ${finalLocation.orientation} ${finalLocation.x} ${finalLocation.y}`);

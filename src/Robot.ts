@@ -29,12 +29,17 @@ export namespace RobotControl {
         'W': (directionToRotate) => directionToRotate == 'Left' ? 'S' : 'N'
     };
 
+    //type PortalType = 'B' | 'O';
+
+    type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
+    
     // Robot Location
-    export interface Location { orientation: CompassReading, x: number, y: number };
+    export interface Location { 
+        portals: Portal,
+        orientation: CompassReading, x: number, y: number };
 
     // Robot command type
-    export type CommandType = 'M' | 'L' | 'R';
-
+    export type CommandType = 'M' | 'L' | 'R' | 'B' | 'O';
 
     // Helper for parsing command type
     export function parseCommandType(command: string): CommandType {
@@ -50,6 +55,12 @@ export namespace RobotControl {
             case 'M':
                 commandType = 'M';
                 break;
+            case 'B':
+                commandType = 'B';
+                break;
+            case 'O':
+                commandType = 'O';
+                break;
             default:
                 throw Error('Invalid command type');
         }
@@ -62,11 +73,15 @@ export namespace RobotControl {
     // Take the current location of the robot and a list of commands and return the final location of the robot
     type RunRobot = (currentLocation: Location, command: MoveCommand[]) => Location;
 
-    type MoveNPostiions = (currentLocation: Location, repeat: number) => Location;
+    type MoveNPositions = (currentLocation: Location, repeat: number) => Location;
 
-    type MovementMap = { [key in CommandType]: MoveNPostiions };
+    type MovementMap = { [key in CommandType]: MoveNPositions };
 
     type MoveSteps = (movementMap: MovementMap, currentLocation: Location, command: MoveCommand) => Location;
+
+    // const movementMap2: MovementMap2 = {
+
+    // };
 
     const movementMap: MovementMap = {
         'L': (currentLocation, repeat) => {
@@ -76,6 +91,12 @@ export namespace RobotControl {
         'R': (currentLocation, repeat) => {
             const newLocation = { ...currentLocation, orientation: rotateMappings[currentLocation.orientation]("Right") };
             return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'R', repeat: repeat - 1 });
+        },
+        'B': (currentLocation, repeat) => {
+            return { ...currentLocation, portals: { ...currentLocation.portals, B: { x: 1, y: 1} } };
+        },
+        'O': (currentLocation, repeat) => {
+            return { ...currentLocation, portals: { ...currentLocation.portals, O: { x: 1, y: 1} } };
         },
         'M': (currentLocation, repeat) => {
             let newLocation: Location;
@@ -92,6 +113,7 @@ export namespace RobotControl {
                 case 'W':
                     newLocation = { ...currentLocation, x: decrementX(currentLocation.x) };
                     break;
+                
                 default:
                     newLocation = currentLocation;
                     break;
