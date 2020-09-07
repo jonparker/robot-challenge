@@ -1,11 +1,9 @@
+import { repeat } from 'ramda';
 import { Assert, given, when, then } from 'typespec-bdd';
 import { RobotControl } from '../src/Robot';
 
 export interface RobotContext {
-	firstCommand: RobotControl.MoveCommand;
-	secondCommand: RobotControl.MoveCommand;
-	thirdCommand: RobotControl.MoveCommand;
-	commands: RobotControl.MoveCommand[];
+	commands: RobotControl.RobotCommand[];
 	initialLocation: RobotControl.Location;
 	actualFinalLocation: RobotControl.Location;
 	parseRepeat: (command: string) => number;
@@ -21,7 +19,7 @@ export class RobotScenarioSteps {
 
 	@given(/^I have entered command (\d+) as (\"(.*)\d+\")$/i)
 	nthCommand(context: RobotContext, commandNumber: number, command: string) {
-		context.commands[commandNumber-1] = { type: RobotControl.parseCommandType(command[0]) , repeat: context.parseRepeat(command) };
+		context.commands[commandNumber-1] = RobotControl.parseRobotCommand(command[0], context.parseRepeat(command));
 	}
 
 	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (\".+\")$/i)

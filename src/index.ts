@@ -70,11 +70,9 @@ import { argv } from 'process';
             const hasSecondDigit = cmd.secondDigit > -1;
             const repeat = !hasFirstDigit && !hasSecondDigit ? 1 :
                 (!hasSecondDigit ? cmd.firstDigit : (10 * cmd.firstDigit) + cmd.secondDigit);
-            return { type: RobotControl.parseCommandType(cmd.command), repeat };
+            return RobotControl.parseRobotCommand(cmd.command, repeat);
         });
 
-        //console.log(JSON.stringify(commandList));
-        
         const finalLocation = RobotControl.Robot(initialLocation, commandList);
         console.log(`Final location: ${finalLocation.orientation} ${finalLocation.x} ${finalLocation.y}`);
     });
