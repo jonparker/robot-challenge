@@ -25,7 +25,8 @@ export namespace RobotControl {
     }
 
     const RotateRobot = (currentLocation: Location, rotate: Rotate): Location => {
-        return { ...currentLocation, orientation: rotateMappings[currentLocation.orientation](rotate.Direction) };
+        const newLocation = { ...currentLocation, orientation: rotateMappings[currentLocation.orientation](rotate.Direction) };
+        return rotate.repeat == 1 ? newLocation : RotateRobot(newLocation, { ...rotate, repeat: rotate.repeat - 1 });
     };
     
     const MoveRobot = (currentLocation: Location, move: Move): Location => {
@@ -50,8 +51,7 @@ export namespace RobotControl {
     type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location;
 
     export const Robot: RunRobot = (currentLocation, commands) => 
-        commands.reduce<Location>((acc: Location, current: RobotCommand, idx, arr) => {
-            console.log('index: ' + idx);
+        commands.reduce<Location>((acc: Location, current: RobotCommand) => {
             if (isMoveCommand(current))
                 return MoveRobot(acc, current);
             else if (isRotateCommand(current))
@@ -67,13 +67,45 @@ export namespace RobotControl {
     type Increment = (num: number, increments: number) => number;
     type Decrement = (num: number, increments: number) => number;
 
-    // Move in X coordinates
-    let incrementX: Increment = (x, incrementBy) => x == maxX ? (minX + incrementBy) : incrementBy == 1 ? x + 1 : incrementX(x + 1, incrementBy - 1);
-    let decrementX: Decrement = (x, decrementBy) => x == minX ? (maxX - decrementBy) : decrementBy == 1 ? x - 1 : decrementX(x - 1, decrementBy - 1);
+    let incrementX: Increment = (x, incrementBy) => {
+        let finalVal = x;
+        while(incrementBy > 0)
+        {
+            finalVal = finalVal == maxX ? minX : finalVal + 1;
+            incrementBy--;
+        }
+        return finalVal;
+    }
 
-    // Move in Y coordinates
-    let incrementY: Increment = (y, incrementBy) => y == maxY ? (minY + incrementBy) : incrementBy == 1 ? y + 1 : incrementY(y + 1, incrementBy - 1);
-    let decrementY: Decrement = (y, decrementBy) => y == minY ? (maxY - decrementBy) : decrementBy == 1 ? y - 1 : decrementY(y - 1, decrementBy - 1);
+    let decrementX: Decrement = (x, decrementBy) => {
+        let finalVal = x;
+        while(decrementBy > 0)
+        {
+            finalVal = finalVal == minX ? maxX : finalVal - 1;
+            decrementBy--;
+        }
+        return finalVal;
+    }
+
+    let incrementY: Increment = (y, incrementBy) => {
+        let finalVal = y;
+        while(incrementBy > 0)
+        {
+            finalVal = finalVal == maxY ? minY : finalVal + 1;
+            incrementBy--;
+        }
+        return finalVal;
+    }
+
+    let decrementY: Decrement = (y, decrementBy) => {
+        let finalVal = y;
+        while(decrementBy > 0)
+        {
+            finalVal = finalVal == minY ? maxY : finalVal - 1;
+            decrementBy--;
+        }
+        return finalVal;
+    }
 
     // Directions & Compass definitions
     export type CompassReading = 'N' | 'S' | 'E' | 'W';

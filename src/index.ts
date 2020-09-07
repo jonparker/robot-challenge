@@ -11,11 +11,11 @@ import { argv } from 'process';
 
     const data: string[] = [];
     
-    await readInterface.on('line', line => {
+    readInterface.on('line', line => {
         data.push(line);
     });
 
-    await readInterface.on('close', () => {
+    readInterface.on('close', () => {
         const [initialLocationStr, commandsStr, ..._] = data;
         const [initialDirectionStr, xStr, yStr] = initialLocationStr.split(' ');
 
