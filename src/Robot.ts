@@ -34,15 +34,8 @@ export namespace RobotControl {
     const isMoveCommand = (cmd: RobotCommand) : cmd is Move => cmd.CommandType == CommandType.Move;
     type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location;
 
-    export const Robot: RunRobot = (currentLocation, commands) => 
-        commands.reduce<Location>((acc: Location, current: RobotCommand) => {
-            if (isMoveCommand(current))
-                return MoveRobot(acc, current);
-            else if (isRotateCommand(current))
-                return RotateRobot(acc, current);
-            else
-                return acc;
-        }, currentLocation);
+    export const Robot: RunRobot = (currentLocation, commands) => commands.reduce<Location>((acc: Location, current: RobotCommand) =>
+        isMoveCommand(current) ? MoveRobot(acc, current) : isRotateCommand(current) ? RotateRobot(acc, current) : acc, currentLocation);
 
     let incrementX: Increment = (x, incrementBy) => 
         Array.from(Array(incrementBy).keys()).map(_ => 1).reduce((acc, _) => acc == maxX ? minX : acc + 1, x);
