@@ -64,10 +64,7 @@ export namespace RobotControl {
 
     type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
     
-    // Robot Location
-    export interface Location { 
-        portals: Portal,
-        orientation: CompassReading, x: number, y: number };
+    export interface Location { portals: Portal, orientation: CompassReading, x: number, y: number };
 
     export function parseRobotCommand(command: string, repeat: number) : RobotCommand {
         const commandTypeStr = command.toUpperCase();
