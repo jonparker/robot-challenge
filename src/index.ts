@@ -1,79 +1,57 @@
 import { RobotControl } from './Robot'
-import * as readline from 'readline';
 import * as fs from 'fs';
 import { argv } from 'process';
 
-(async function run() {
-    const inputFile = argv[2];
-    const readInterface = readline.createInterface({ 
-        input: fs.createReadStream(inputFile)
-    });
+(async () => {
+    const fileContent = (await fs.promises.readFile(argv[2])).toString().split('\n');
+    const [initialLocationStr, commandsStr, ..._] = fileContent;
+    const [initialDirectionStr, xStr, yStr] = initialLocationStr.split(' ');
+    const initialLocation = RobotControl.parseInitialLocation(initialDirectionStr, xStr, yStr);
+    enum CommandBuffer { CommandChar, CommandCharAndDigit, Empty };
+    type CommandInfo = { command: string, repeats?: number };
 
-    const data: string[] = [];
+    let commandListTmp: CommandInfo[] = [];
+    let commandBuffer: CommandBuffer = CommandBuffer.Empty;
     
-    readInterface.on('line', line => {
-        data.push(line);
+    commandsStr.split('').forEach(cmdChar => {
+        const cmdInt = Number.parseInt(cmdChar);
+        const cmdIsInt = !isNaN(cmdInt);
+
+        switch (commandBuffer) {
+            case CommandBuffer.Empty:
+                commandListTmp.push({ command: cmdChar });
+                commandBuffer = CommandBuffer.CommandChar;
+                break;
+            case CommandBuffer.CommandChar:
+                if (cmdIsInt)
+                {
+                    const cmd = commandListTmp.pop();
+                    if (cmd) {
+                        commandListTmp.push({ ...cmd, repeats: cmdInt });
+                    }
+                    commandBuffer = CommandBuffer.CommandCharAndDigit;
+                }
+                else {
+                    commandListTmp.push({ command: cmdChar });
+                }
+                break;
+            case CommandBuffer.CommandCharAndDigit:
+                if (cmdIsInt) {
+                    const cmd = commandListTmp.pop();
+                    if (cmd) {
+                        commandListTmp.push({ ...cmd, repeats: (10 * (cmd.repeats || 0)) + cmdInt });
+                    }
+                    commandBuffer = CommandBuffer.Empty;
+                }
+                else {
+                    commandListTmp.push({ command: cmdChar });
+                    commandBuffer = CommandBuffer.CommandChar;
+                }
+                break;
+        }
     });
 
-    readInterface.on('close', () => {
-        const [initialLocationStr, commandsStr, ..._] = data;
-        const [initialDirectionStr, xStr, yStr] = initialLocationStr.split(' ');
-
-        let initialDirection: RobotControl.CompassReading;
-        switch (initialDirectionStr) {
-            case 'N':
-                initialDirection = 'N';
-                break;
-            case 'S':
-                initialDirection = 'S';
-                break;
-            case 'E':
-                initialDirection = 'E';
-                break;
-            case 'W':
-                initialDirection = 'W';
-                break
-            default:
-                throw Error(`Invalid initial direction ${initialDirectionStr}`);
-        }
-        const x = Number.parseInt(xStr);
-        const y = Number.parseInt(yStr);
-
-        if (isNaN(x) || isNaN(y)) {
-            throw Error(`Invalid initial location ${xStr} ${yStr}`);
-        }
-
-        const initialLocation: RobotControl.Location = { x, y, orientation: initialDirection, portals: {} };
-        const isCommandChar = (char?:string): boolean => char == 'L' || char == 'R' || char == 'M' || char == 'B' || char == 'O';
-        
-        type commandInfo = { command: string, firstDigit: number, secondDigit: number };
-
-        const commandList = commandsStr
-            .split('')
-            .reduce((commandList: commandInfo[], char: string): commandInfo[] =>
-            {
-                if (isCommandChar(char))
-                    return [...commandList, { command: char, firstDigit: -1, secondDigit: -1 }];
-                
-                const digit = Number.parseInt(char);
-                const previousCommands = [...commandList];
-                previousCommands.pop();
-                const lastCommand = commandList[commandList.length - 1];
-                const firstDigit = lastCommand?.firstDigit > 0 ? lastCommand.firstDigit : digit;
-                const secondDigit = lastCommand?.firstDigit > 0 ? digit : -1;
-                
-                return [...previousCommands, { ...lastCommand, firstDigit, secondDigit }];
-            },
-            [] as commandInfo[]
-        ).map(cmd => {
-            const hasFirstDigit = cmd.firstDigit > -1;
-            const hasSecondDigit = cmd.secondDigit > -1;
-            const repeat = !hasFirstDigit && !hasSecondDigit ? 1 :
-                (!hasSecondDigit ? cmd.firstDigit : (10 * cmd.firstDigit) + cmd.secondDigit);
-            return RobotControl.parseRobotCommand(cmd.command, repeat);
-        });
-
-        const finalLocation = RobotControl.Robot(initialLocation, commandList);
-        console.log(`Final location: ${finalLocation.orientation} ${finalLocation.x} ${finalLocation.y}`);
-    });
+    const commandList = commandListTmp.map(cmd => RobotControl.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
+    const finalLocation = RobotControl.Robot(initialLocation, commandList);
+    console.log(`Final location: ${RobotControl.CompassReading[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
 })();
