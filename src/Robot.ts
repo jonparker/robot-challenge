@@ -15,10 +15,10 @@ export namespace RobotControl {
     }
 
     const rotateMappings: RotateMapping[] = [
-        { currentDirection: Compass.North, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.West : Compass.East },
-        { currentDirection: Compass.South, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.East : Compass.West },
-        { currentDirection: Compass.East, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.North : Compass.South },
-        { currentDirection: Compass.West, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.South : Compass.North },
+        { currentDirection: Compass.North, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.West : Compass.East },
+        { currentDirection: Compass.South, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.East : Compass.West },
+        { currentDirection: Compass.East, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.North : Compass.South },
+        { currentDirection: Compass.West, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.South : Compass.North },
     ];
 
     const RotateRobot = (currentLocation: Location, rotate: Rotate): Location => {
