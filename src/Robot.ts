@@ -1,16 +1,22 @@
 enum CommandType { Rotate, Move }
 enum Direction { Left, Right }
+enum Compass { North = 'North', South = 'South', East = 'East', West = 'West' }
 
 interface RobotCommand { CommandType: CommandType, repeat: number }
-enum Compass { North = 'North', South = 'South', East = 'East', West = 'West' }
 interface Location { portals: Portal, orientation: Compass, x: number, y: number };
-
 interface Rotate extends RobotCommand { Direction: Direction, CommandType: CommandType.Rotate }
 interface Move extends RobotCommand { CommandType: CommandType.Move }
-interface RotateMapping {
-    currentDirection: Compass,
-    rotate: (directionToRotate: Direction) => Compass
-}
+interface RotateMapping { currentDirection: Compass, rotate: (directionToRotate: Direction) => Compass }
+
+type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location;
+type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
+type Increment = (num: number, increments: number) => number;
+type Decrement = (num: number, increments: number) => number;
+
+const incrementX: Increment = (x, incrementBy) => (x + incrementBy) % 100;
+const decrementX: Decrement = (x, decrementBy) => (x - decrementBy) >= 0 ? x - decrementBy : 100 + (x - decrementBy);
+const incrementY: Increment = (y, incrementBy) => (y + incrementBy) % 100;
+const decrementY: Decrement = (y, decrementBy) => (y - decrementBy) >= 0 ? y - decrementBy : 100 + (y - decrementBy);
 
 const rotateMappings: RotateMapping[] = [
     { currentDirection: Compass.North, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.West : Compass.East },
@@ -44,38 +50,29 @@ const isRotateCommand = (cmd: RobotCommand) : cmd is Rotate => cmd.CommandType =
 const isMoveCommand = (cmd: RobotCommand) : cmd is Move => {
     return cmd.CommandType === CommandType.Move;
 };
-type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location;
 
 const runRobot: RunRobot = (currentLocation, commands) => commands.reduce<Location>((acc: Location, current: RobotCommand) =>
     isMoveCommand(current) ? MoveRobot(acc, current) : isRotateCommand(current) ? RotateRobot(acc, current) : acc, currentLocation);
 
-type Increment = (num: number, increments: number) => number;
-type Decrement = (num: number, increments: number) => number;
-
-let incrementX: Increment = (x, incrementBy) => (x + incrementBy) % 100;
-let decrementX: Decrement = (x, decrementBy) => (x - decrementBy) >= 0 ? x - decrementBy : 100 + (x - decrementBy);
-let incrementY: Increment = (y, incrementBy) => (y + incrementBy) % 100;
-let decrementY: Decrement = (y, decrementBy) => (y - decrementBy) >= 0 ? y - decrementBy : 100 + (y - decrementBy);
-
-type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
-
-const parseDirection = (direction: string) : Compass => {
+const parseDirection = (direction: string) : Compass | Error => {
     const mappings: Record<string, Compass> = {
         'N': Compass.North,
         'S': Compass.South,
         'E': Compass.East,
         'W': Compass.West
     };
-    return mappings[direction];
+    return mappings[direction] ?? Error(`Could not parse direction ${direction}`);
 }
 
-const parseInitialLocationTokens = (direction: string, xStr: string, yStr: string): Location | undefined => {
-    const x = Number.parseInt(xStr);
-    const y = Number.parseInt(yStr);
-    return !isNaN(x) && !isNaN(y) ? { x, y, orientation: parseDirection(direction), portals: {} } : undefined;
+const parseInitialLocationTokens = (direction: string, xStr: string, yStr: string): Location | Error => {
+    const x = +xStr;
+    const y = +yStr;
+    const orientation = parseDirection(direction);
+    return !isNaN(x) && !isNaN(y) && !isError(orientation) ? { x, y, orientation, portals: {} } :
+        isError(orientation) ? orientation : Error(`Could not parse ${xStr} or ${yStr}`);
 }
 
-const parseRobotCommand = (command: string, repeat: number) : RobotCommand => 
+const parseRobotCommand = (command: string, repeat: number) : RobotCommand =>
     ({
         'L': { Direction: Direction.Left, repeat, CommandType: CommandType.Rotate },
         'R': { Direction: Direction.Right, repeat, CommandType: CommandType.Rotate },
@@ -83,27 +80,28 @@ const parseRobotCommand = (command: string, repeat: number) : RobotCommand =>
     } as Record<string, Rotate | Move>
     )[command.toUpperCase()];
 
-const parseInitialLocation = (initialLocationStr: string): Location => {
+const parseInitialLocation = (initialLocationStr: string): Location | Error => {
     const [initialDirectionStr, x, y] = initialLocationStr.split(' ');
     const initialLocation = parseInitialLocationTokens(initialDirectionStr, x, y);
-    if (!initialLocation)
-    {
-        console.log(`Initial location ${initialLocationStr} could not be parsed.`);
-        throw Error(`Initial location ${initialLocationStr} could not be parsed.`);
-    }
-    return initialLocation;
+    return isError(initialLocation) ? Error(`Initial location ${initialLocationStr} could not be parsed: ${initialLocation}`) :
+        initialLocation;
 }
 
-const parseInput = (initialLocationStr: string, commandsStr: string): { initialLocation: Location, commandList: RobotCommand[] } => {
+const isError = (some: any) : some is Error => {
+    return some.message && some.name && some.stack;
+}
+
+const parseInput = (initialLocationStr: string, commandsStr: string): { initialLocation: Location, commandList: RobotCommand[] } | Error => {
     const initialLocation = parseInitialLocation(initialLocationStr);
+    if (isError(initialLocation)) return initialLocation;
     enum ParseBufferState { CommandChar, CommandCharAndDigit, Empty };
     type CommandInfo = { command: string, repeats?: number };
 
-    let commandTokenList: CommandInfo[] = [];
+    const commandTokenList: CommandInfo[] = [];
     let parseBuffer: ParseBufferState = ParseBufferState.Empty;
-    
+
     commandsStr.split('').forEach(cmdChar => {
-        const cmdInt = Number.parseInt(cmdChar);
+        const cmdInt = +cmdChar;
         const cmdIsInt = !isNaN(cmdInt);
 
         switch (parseBuffer) {
@@ -146,6 +144,7 @@ const parseInput = (initialLocationStr: string, commandsStr: string): { initialL
 
 const Robot = (initialLocation: string, commandList: string) => {
     const input = parseInput(initialLocation, commandList);
+    if (isError(input)) return input;
     return runRobot(input.initialLocation, input.commandList);
 }
 
@@ -155,4 +154,4 @@ const robotParser = {
     parseRobotCommand
 };
 
-export { robotParser, Robot, RobotCommand,  Compass, Location };
+export { robotParser, Robot, isError, RobotCommand, Compass, Location };
