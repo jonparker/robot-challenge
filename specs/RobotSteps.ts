@@ -1,9 +1,9 @@
 import { Assert, given, when, then } from 'typespec-bdd';
-import { Robot, RobotCommand, robotParser, Location } from '../src/Robot';
+import { Robot, robotParser, Location } from '../src/Robot';
 
 export interface RobotContext {
-	commands: RobotCommand[];
-	initialLocation: Location;
+	commands: string;
+	initialLocation: string;
 	actualFinalLocation: Location;
 	parseRepeat: (command: string) => number;
 }
@@ -13,19 +13,16 @@ export class RobotScenarioSteps {
 	@given(/^I am running the robot controller$/i)
 	usingARobot(context: RobotContext) {
 		context.parseRepeat = (command: string) => command.length === 1 ? 1 : Number.parseInt(command.substring(1));
-		context.commands = [];
 	}
 
-	@given(/^I have entered command (\d+) as (\"(.*)\d+\")$/i)
-	nthCommand(context: RobotContext, commandNumber: number, command: string) {
-		context.commands[commandNumber-1] = robotParser.parseRobotCommand(command[0], context.parseRepeat(command));
+	@given(/^I have entered commands (".*")$/i)
+	enteredCommands(context: RobotContext, commands: string) {
+		context.commands = commands;
 	}
 
-	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (\".+\")$/i)
-	initialLocationCommand(context: RobotContext, x: number, y: number, direction: string) {
-		const initialLoc = robotParser.parseInitialLocation(direction, x.toString(), y.toString());
-		if (!initialLoc) throw new Error('Could not parse initial location');
-		context.initialLocation = initialLoc;
+	@given(/^I have set the initial location as (\".*")$/i)
+	initialLocationCommand(context: RobotContext, location: string) {
+		context.initialLocation = location;
     }
 
     @when(/^I run the robot$/gi)
