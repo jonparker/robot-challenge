@@ -2,61 +2,65 @@ import { RobotControl } from './Robot';
 import * as fs from 'fs';
 import { argv } from 'process';
 
+const parseInitialLocation = (initialLocationStr: string): RobotControl.Location | undefined => {
+    const [initialDirectionStr, x, y] = initialLocationStr.split(' ');
+    const initialLocation = RobotControl.parseInitialLocation(initialDirectionStr, x, y);
+    return initialLocation;
+}
+
 (async () => {
     const fileContent = (await fs.promises.readFile(argv[2])).toString().split('\n');
     const [initialLocationStr, commandsStr, ..._] = fileContent;
-    const [initialDirectionStr, xStr, yStr] = initialLocationStr.split(' ');
-    const initialLocation = RobotControl.parseInitialLocation(initialDirectionStr, xStr, yStr);
+    const initialLocation = parseInitialLocation(initialLocationStr);
     if (!initialLocation)
     {
         console.log(`Initial location ${initialLocationStr} could not be parsed.`);
-        return;
     }
-    enum CommandBuffer { CommandChar, CommandCharAndDigit, Empty };
+    enum ParseBufferState { CommandChar, CommandCharAndDigit, Empty };
     type CommandInfo = { command: string, repeats?: number };
 
-    let commandListTmp: CommandInfo[] = [];
-    let commandBuffer: CommandBuffer = CommandBuffer.Empty;
+    let commandTokenList: CommandInfo[] = [];
+    let parseBuffer: ParseBufferState = ParseBufferState.Empty;
     
     commandsStr.split('').forEach(cmdChar => {
         const cmdInt = Number.parseInt(cmdChar);
         const cmdIsInt = !isNaN(cmdInt);
 
-        switch (commandBuffer) {
-            case CommandBuffer.Empty:
-                commandListTmp.push({ command: cmdChar });
-                commandBuffer = CommandBuffer.CommandChar;
+        switch (parseBuffer) {
+            case ParseBufferState.Empty:
+                commandTokenList.push({ command: cmdChar });
+                parseBuffer = ParseBufferState.CommandChar;
                 break;
-            case CommandBuffer.CommandChar:
+            case ParseBufferState.CommandChar:
                 if (cmdIsInt)
                 {
-                    const cmd = commandListTmp.pop();
+                    const cmd = commandTokenList.pop();
                     if (cmd) {
-                        commandListTmp.push({ ...cmd, repeats: cmdInt });
+                        commandTokenList.push({ ...cmd, repeats: cmdInt });
                     }
-                    commandBuffer = CommandBuffer.CommandCharAndDigit;
+                    parseBuffer = ParseBufferState.CommandCharAndDigit;
                 }
                 else {
-                    commandListTmp.push({ command: cmdChar });
+                    commandTokenList.push({ command: cmdChar });
                 }
                 break;
-            case CommandBuffer.CommandCharAndDigit:
+            case ParseBufferState.CommandCharAndDigit:
                 if (cmdIsInt) {
-                    const cmd = commandListTmp.pop();
+                    const cmd = commandTokenList.pop();
                     if (cmd) {
-                        commandListTmp.push({ ...cmd, repeats: (10 * (cmd.repeats || 0)) + cmdInt });
+                        commandTokenList.push({ ...cmd, repeats: (10 * (cmd.repeats || 0)) + cmdInt });
                     }
-                    commandBuffer = CommandBuffer.Empty;
+                    parseBuffer = ParseBufferState.Empty;
                 }
                 else {
-                    commandListTmp.push({ command: cmdChar });
-                    commandBuffer = CommandBuffer.CommandChar;
+                    commandTokenList.push({ command: cmdChar });
+                    parseBuffer = ParseBufferState.CommandChar;
                 }
                 break;
         }
     });
 
-    const commandList = commandListTmp.map(cmd => RobotControl.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
+    const commandList = commandTokenList.map(cmd => RobotControl.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
     const finalLocation = RobotControl.Robot(initialLocation, commandList);
     console.log(`Final location: ${RobotControl.Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
 })();
