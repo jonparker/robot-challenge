@@ -11,4 +11,3 @@ interface Move extends RobotCommand { CommandType: CommandType.Move }
 const isError = (some: any) : some is Error => some.message && some.name && some.stack;
 
 export { isError, Rotate, Move, CommandType, Direction, Compass, RobotCommand, Location, Portal };
-

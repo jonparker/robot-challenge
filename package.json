@@ -31,14 +31,6 @@
   },
   "dependencies": {
     "@types/jest": "^26.0.13",
-    "@types/line-reader": "0.0.30",
-    "@types/n-readlines": "^1.0.1",
-    "@types/ramda": "^0.27.14",
-    "fp-ts": "^2.8.2",
-    "line-reader": "^0.4.0",
-    "lodash": "^4.17.20",
-    "n-readlines": "^1.0.0",
-    "ramda": "^0.27.1",
-    "typed-prompts": "^1.5.0"
+    "lodash": "^4.17.20"
   }
 }
