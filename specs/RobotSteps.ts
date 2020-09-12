@@ -1,5 +1,8 @@
 import { Assert, given, when, then } from 'typespec-bdd';
-import { Robot, robotParser, Location, isError } from '../src/Robot';
+import { Robot } from '../src/Robot';
+import { Parser } from '../src/Parser';
+import { stdout } from 'process';
+import { isError, Location } from '../src/Types';
 
 export interface RobotContext {
 	commands: string;
@@ -33,13 +36,12 @@ export class RobotScenarioSteps {
 	@then(/^the output should be (\d+),(\d+),(.*)$/i)
 	verifyOutput(context: RobotContext, x: number, y: number, orientation: string) {
 		if (isError(context.actualFinalLocation)) {
-			console.log(context.actualFinalLocation.message);
-			//Assert.fail(context.actualFinalLocation.message);
+			stdout.write(context.actualFinalLocation.message + '\n');
 			return;
 		}
 		Assert.isTrue(x === context.actualFinalLocation.x, `x: ${x} was expected but got ${context.actualFinalLocation.x}`);
 		Assert.isTrue(y === context.actualFinalLocation.y, `y: ${y} was expected but got ${context.actualFinalLocation.y}`);
-		Assert.isTrue(robotParser.parseDirection(orientation) === context.actualFinalLocation.orientation, 
+		Assert.isTrue(Parser.parseDirection(orientation) === context.actualFinalLocation.orientation, 
 			`orientation: ${orientation} was expected but got ${context.actualFinalLocation.orientation}`);
 	}
 }

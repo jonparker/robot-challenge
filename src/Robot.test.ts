@@ -1,18 +1,19 @@
-import { robotParser, Compass } from './Robot';
+import { Parser } from './Parser';
+import { Compass } from './Types';
 
-describe('RobotControl.parser.parseDirection', () => {
+describe('Parser.parseDirection', () => {
     test.each([
         ['N', Compass.North],
         ['S', Compass.South],
         ['E', Compass.East],
         ['W', Compass.West]
     ])('parseDirection("%s") - %s', (input, expected) => {
-        const result = robotParser.parseDirection(input);
+        const result = Parser.parseDirection(input);
         expect(result).toBe(expected);
     });
 });
 
-describe('RobotControl.parser.parseRobotCommand', () => {
+describe('Parser.parseRobotCommand', () => {
     type DataRow = { location: string, expectX: number, expectY: number, expectOrientation: Compass};
     test.each`
     location      | expectX | expectY | expectOrientation
@@ -23,7 +24,7 @@ describe('RobotControl.parser.parseRobotCommand', () => {
     ${'N 99 99'}  | ${99}   | ${99}   | ${Compass.North}
     ${'S 99 0'}   | ${99}   | ${0}    | ${Compass.South}
     `('parseInitialLocation("$location) - { x: $expectX, y: $expectY, orientation: $expectOrientation, portals: {} }', (row: DataRow) => {
-        const result = robotParser.parseInitialLocation(row.location);
+        const result = Parser.parseInitialLocation(row.location);
         expect(result).toEqual({ x: row.expectX, y: row.expectY, orientation: row.expectOrientation, portals: {} });
     });
 });
