@@ -1,4 +1,4 @@
-import { AutoRunner } from '../node_modules/typespec-bdd';
+import { AutoRunner } from 'typespec-bdd';
 
 import './RobotSteps';
 

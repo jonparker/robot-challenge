@@ -1,110 +1,87 @@
 export namespace RobotControl {
 
-    // Grid boundaries
-    const minX = 0, minY = 0, maxX = 99, maxY = 99;
+    enum CommandType { Rotate, Move }
+    enum Direction { Left, Right }
 
-    // Movement function definitions
-    type Increment = (num: number) => number;
-    type Decrement = (num: number) => number;
+    export interface RobotCommand { CommandType: CommandType, repeat: number }
+    export enum Compass { North, South, East, West }
+    export interface Location { portals: Portal, orientation: Compass, x: number, y: number };
 
-    // Move in X coordinates
-    let incrementX: Increment = x => x == maxX ? minX : x + 1;
-    let decrementX: Decrement = x => x == minX ? maxX : x - 1;
-
-    // Move in Y coordinates
-    let incrementY: Increment = y => y == maxY ? minY : y + 1;
-    let decrementY: Decrement = y => y == minY ? maxY : y - 1;
-
-    // Directions & Compass definitions
-    type Direction = 'Left' | 'Right';
-    export type CompassReading = 'N' | 'S' | 'E' | 'W';
-
-    type rotateMap = { [key in CompassReading] : (directionToMove: Direction) => CompassReading };
-
-    // Rotation mappings
-    const rotateMappings: rotateMap = {
-        'N': (directionToRotate) => directionToRotate == 'Left' ? 'W' : 'E',
-        'S': (directionToRotate) => directionToRotate == 'Left' ? 'E' : 'W',
-        'E': (directionToRotate) => directionToRotate == 'Left' ? 'N' : 'S',
-        'W': (directionToRotate) => directionToRotate == 'Left' ? 'S' : 'N'
-    };
-
-    // Robot Location
-    export interface Location { orientation: CompassReading, x: number, y: number };
-
-    // Robot command type
-    export type CommandType = 'M' | 'L' | 'R';
-
-
-    // Helper for parsing command type
-    export function parseCommandType(command: string): CommandType {
-        const commandTypeStr = command.toUpperCase();
-        let commandType: RobotControl.CommandType;
-        switch (commandTypeStr) {
-            case 'L':
-                commandType = 'L';
-                break;
-            case 'R':
-                commandType = 'R';
-                break;
-            case 'M':
-                commandType = 'M';
-                break;
-            default:
-                throw Error('Invalid command type');
-        }
-        return commandType;
+    interface Rotate extends RobotCommand { Direction: Direction, CommandType: CommandType.Rotate }
+    interface Move extends RobotCommand { CommandType: CommandType.Move }
+    interface RotateMapping {
+        currentDirection: Compass,
+        rotate: (directionToRotate: Direction) => Compass
     }
 
-    // Robot move command
-    export type MoveCommand = { type: CommandType, repeat: number }
+    const rotateMappings: RotateMapping[] = [
+        { currentDirection: Compass.North, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.West : Compass.East },
+        { currentDirection: Compass.South, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.East : Compass.West },
+        { currentDirection: Compass.East, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.North : Compass.South },
+        { currentDirection: Compass.West, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.South : Compass.North },
+    ];
 
-    // Take the current location of the robot and a list of commands and return the final location of the robot
-    type RunRobot = (currentLocation: Location, command: MoveCommand[]) => Location;
-
-    type MoveNPostiions = (currentLocation: Location, repeat: number) => Location;
-
-    type MovementMap = { [key in CommandType]: MoveNPostiions };
-
-    type MoveSteps = (movementMap: MovementMap, currentLocation: Location, command: MoveCommand) => Location;
-
-    const movementMap: MovementMap = {
-        'L': (currentLocation, repeat) => {
-            const newLocation = { ...currentLocation, orientation: rotateMappings[currentLocation.orientation]("Left") };
-            return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'L', repeat: repeat - 1 });
-        },
-        'R': (currentLocation, repeat) => {
-            const newLocation = { ...currentLocation, orientation: rotateMappings[currentLocation.orientation]("Right") };
-            return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'R', repeat: repeat - 1 });
-        },
-        'M': (currentLocation, repeat) => {
-            let newLocation: Location;
-            switch (currentLocation.orientation) {
-                case 'N':
-                    newLocation = { ...currentLocation, y: incrementY(currentLocation.y) };
-                    break;
-                case 'S':
-                    newLocation = { ...currentLocation, y: decrementY(currentLocation.y) };
-                    break;
-                case 'E':
-                    newLocation = { ...currentLocation, x: incrementX(currentLocation.x) };
-                    break;
-                case 'W':
-                    newLocation = { ...currentLocation, x: decrementX(currentLocation.x) };
-                    break;
-                default:
-                    newLocation = currentLocation;
-                    break;
-            }
-            return repeat == 1 ? newLocation : move(movementMap, newLocation, { type: 'M', repeat: repeat - 1 });
+    const RotateRobot = (currentLocation: Location, rotate: Rotate): Location => {
+        const rotateMapping = rotateMappings.find(m => m.currentDirection === currentLocation.orientation);
+        const newLocation = { ...currentLocation, orientation: rotateMapping?.rotate(rotate.Direction) ?? currentLocation.orientation };
+        return rotate.repeat === 1 ? newLocation : RotateRobot(newLocation, { ...rotate, repeat: rotate.repeat - 1 });
+    };
+    
+    const MoveRobot = (currentLocation: Location, move: Move): Location => {
+        switch (currentLocation.orientation) {
+            case Compass.North:
+                return { ...currentLocation, y: incrementY(currentLocation.y, move.repeat) };
+            case Compass.South:
+                return { ...currentLocation, y: decrementY(currentLocation.y, move.repeat) };
+            case Compass.East:
+                return { ...currentLocation, x: incrementX(currentLocation.x, move.repeat) };
+            case Compass.West:
+                return { ...currentLocation, x: decrementX(currentLocation.x, move.repeat) };
+            default:
+                return currentLocation;
         }
-    };
+    }
 
-    const move: MoveSteps = (movementMap, currentLocation, command) => {
-        return movementMap[command.type](currentLocation, command.repeat);
+    const isRotateCommand = (cmd: RobotCommand) : cmd is Rotate => cmd.CommandType === CommandType.Rotate;
+    const isMoveCommand = (cmd: RobotCommand) : cmd is Move => {
+        return cmd.CommandType === CommandType.Move;
     };
+    type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location;
 
-    export const Robot: RunRobot = (currentLocation, [firstCommand, ...restOfCommands]) => restOfCommands.length ?
-        Robot(move(movementMap, currentLocation, firstCommand), restOfCommands) : 
-        move(movementMap, currentLocation, firstCommand);
+    export const Robot: RunRobot = (currentLocation, commands) => commands.reduce<Location>((acc: Location, current: RobotCommand) =>
+        isMoveCommand(current) ? MoveRobot(acc, current) : isRotateCommand(current) ? RotateRobot(acc, current) : acc, currentLocation);
+
+    type Increment = (num: number, increments: number) => number;
+    type Decrement = (num: number, increments: number) => number;
+
+    let incrementX: Increment = (x, incrementBy) => (x + incrementBy) % 100;
+    let decrementX: Decrement = (x, decrementBy) => (x - decrementBy) >= 0 ? x - decrementBy : 100 + (x - decrementBy);
+    let incrementY: Increment = (y, incrementBy) => (y + incrementBy) % 100;
+    let decrementY: Decrement = (y, decrementBy) => (y - decrementBy) >= 0 ? y - decrementBy : 100 + (y - decrementBy);
+
+    type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
+
+    export const parseDirection = (direction: string) : Compass => {
+        const mappings: Record<string, Compass> = {
+            'N': Compass.North,
+            'S': Compass.South,
+            'E': Compass.East,
+            'W': Compass.West
+        };
+        return mappings[direction];
+    }
+
+    export const parseInitialLocation = (direction: string, xStr: string, yStr: string): Location | undefined => {
+        const x = Number.parseInt(xStr);
+        const y = Number.parseInt(yStr);
+        return !isNaN(x) && !isNaN(y) ? { x, y, orientation: parseDirection(direction), portals: {} } : undefined;
+    }
+
+    export const parseRobotCommand = (command: string, repeat: number) : RobotCommand => 
+        ({
+            'L': { Direction: Direction.Left, repeat, CommandType: CommandType.Rotate },
+            'R': { Direction: Direction.Right, repeat, CommandType: CommandType.Rotate },
+            'M': { repeat, CommandType: CommandType.Move }
+        } as Record<string, Rotate | Move>
+        )[command.toUpperCase()];
 }
