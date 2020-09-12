@@ -1,10 +1,10 @@
-import { RobotControl } from './Robot';
+import { robotParser, Robot, Compass, Location } from './Robot';
 import * as fs from 'fs';
 import { argv } from 'process';
 
-const parseInitialLocation = (initialLocationStr: string): RobotControl.Location => {
+const parseInitialLocation = (initialLocationStr: string): Location => {
     const [initialDirectionStr, x, y] = initialLocationStr.split(' ');
-    const initialLocation = RobotControl.parser.parseInitialLocation(initialDirectionStr, x, y);
+    const initialLocation = robotParser.parseInitialLocation(initialDirectionStr, x, y);
     if (!initialLocation)
     {
         console.log(`Initial location ${initialLocationStr} could not be parsed.`);
@@ -62,7 +62,7 @@ const parseInitialLocation = (initialLocationStr: string): RobotControl.Location
         }
     });
 
-    const commandList = commandTokenList.map(cmd => RobotControl.parser.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
-    const finalLocation = RobotControl.Robot(initialLocation, commandList);
-    console.log(`Final location: ${RobotControl.Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
+    const commandList = commandTokenList.map(cmd => robotParser.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
+    const finalLocation = Robot(initialLocation, commandList);
+    console.log(`Final location: ${Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
 })();

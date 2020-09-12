@@ -1,10 +1,10 @@
 import { Assert, given, when, then } from 'typespec-bdd';
-import { RobotControl } from '../src/Robot';
+import { Robot, RobotCommand, robotParser, Location } from '../src/Robot';
 
 export interface RobotContext {
-	commands: RobotControl.RobotCommand[];
-	initialLocation: RobotControl.Location;
-	actualFinalLocation: RobotControl.Location;
+	commands: RobotCommand[];
+	initialLocation: Location;
+	actualFinalLocation: Location;
 	parseRepeat: (command: string) => number;
 }
 
@@ -18,19 +18,19 @@ export class RobotScenarioSteps {
 
 	@given(/^I have entered command (\d+) as (\"(.*)\d+\")$/i)
 	nthCommand(context: RobotContext, commandNumber: number, command: string) {
-		context.commands[commandNumber-1] = RobotControl.parser.parseRobotCommand(command[0], context.parseRepeat(command));
+		context.commands[commandNumber-1] = robotParser.parseRobotCommand(command[0], context.parseRepeat(command));
 	}
 
 	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (\".+\")$/i)
 	initialLocationCommand(context: RobotContext, x: number, y: number, direction: string) {
-		const initialLoc = RobotControl.parser.parseInitialLocation(direction, x.toString(), y.toString());
+		const initialLoc = robotParser.parseInitialLocation(direction, x.toString(), y.toString());
 		if (!initialLoc) throw new Error('Could not parse initial location');
 		context.initialLocation = initialLoc;
     }
 
     @when(/^I run the robot$/gi)
 	runRobot(context: RobotContext) {
-		context.actualFinalLocation = RobotControl.Robot(context.initialLocation, context.commands);
+		context.actualFinalLocation = Robot(context.initialLocation, context.commands);
 	}
 
 	@then(/^the output should be (\d+),(\d+),(.*)$/i)
@@ -38,7 +38,7 @@ export class RobotScenarioSteps {
 		Assert.isTrue(x === context.actualFinalLocation.x, `x: ${x} was expected but got ${context.actualFinalLocation.x}`);
 		Assert.isTrue(y === context.actualFinalLocation.y, `y: ${y} was expected but got ${context.actualFinalLocation.y}`);
 		
-		Assert.isTrue(RobotControl.parser.parseDirection(orientation) === context.actualFinalLocation.orientation, 
+		Assert.isTrue(robotParser.parseDirection(orientation) === context.actualFinalLocation.orientation, 
 			`orientation: ${orientation} was expected but got ${context.actualFinalLocation.orientation}`);
 	}
 }
