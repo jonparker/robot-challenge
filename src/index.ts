@@ -1,4 +1,4 @@
-import { RobotControl } from './Robot'
+import { RobotControl } from './Robot';
 import * as fs from 'fs';
 import { argv } from 'process';
 
@@ -7,6 +7,11 @@ import { argv } from 'process';
     const [initialLocationStr, commandsStr, ..._] = fileContent;
     const [initialDirectionStr, xStr, yStr] = initialLocationStr.split(' ');
     const initialLocation = RobotControl.parseInitialLocation(initialDirectionStr, xStr, yStr);
+    if (!initialLocation)
+    {
+        console.log(`Initial location ${initialLocationStr} could not be parsed.`);
+        return;
+    }
     enum CommandBuffer { CommandChar, CommandCharAndDigit, Empty };
     type CommandInfo = { command: string, repeats?: number };
 
@@ -53,5 +58,5 @@ import { argv } from 'process';
 
     const commandList = commandListTmp.map(cmd => RobotControl.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
     const finalLocation = RobotControl.Robot(initialLocation, commandList);
-    console.log(`Final location: ${RobotControl.CompassReading[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
+    console.log(`Final location: ${RobotControl.Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
 })();

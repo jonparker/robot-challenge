@@ -1,29 +1,41 @@
-import { dir } from "console";
-
 export namespace RobotControl {
 
     enum CommandType { Rotate, Move }
-    enum DirectionValue { Left, Right }
+    enum Direction { Left, Right }
 
     export interface RobotCommand { CommandType: CommandType, repeat: number }
-    interface Rotate extends RobotCommand { Direction: DirectionValue, CommandType: CommandType.Rotate }
+    export enum Compass { North, South, East, West }
+    export interface Location { portals: Portal, orientation: Compass, x: number, y: number };
+
+    interface Rotate extends RobotCommand { Direction: Direction, CommandType: CommandType.Rotate }
     interface Move extends RobotCommand { CommandType: CommandType.Move }
+    interface RotateMapping {
+        currentDirection: Compass,
+        rotate: (directionToRotate: Direction) => Compass
+    }
+
+    const rotateMappings: RotateMapping[] = [
+        { currentDirection: Compass.North, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.West : Compass.East },
+        { currentDirection: Compass.South, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.East : Compass.West },
+        { currentDirection: Compass.East, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.North : Compass.South },
+        { currentDirection: Compass.West, rotate: (rotate: Direction) => rotate == Direction.Left ? Compass.South : Compass.North },
+    ];
 
     const RotateRobot = (currentLocation: Location, rotate: Rotate): Location => {
         const rotateMapping = rotateMappings.find(m => m.currentDirection === currentLocation.orientation);
-        const newLocation = { ...currentLocation, orientation: rotateMapping?.rotate(rotate.Direction) || currentLocation.orientation };
+        const newLocation = { ...currentLocation, orientation: rotateMapping?.rotate(rotate.Direction) ?? currentLocation.orientation };
         return rotate.repeat === 1 ? newLocation : RotateRobot(newLocation, { ...rotate, repeat: rotate.repeat - 1 });
     };
     
     const MoveRobot = (currentLocation: Location, move: Move): Location => {
         switch (currentLocation.orientation) {
-            case CompassReading.North:
+            case Compass.North:
                 return { ...currentLocation, y: incrementY(currentLocation.y, move.repeat) };
-            case CompassReading.South:
+            case Compass.South:
                 return { ...currentLocation, y: decrementY(currentLocation.y, move.repeat) };
-            case CompassReading.East:
+            case Compass.East:
                 return { ...currentLocation, x: incrementX(currentLocation.x, move.repeat) };
-            case CompassReading.West:
+            case Compass.West:
                 return { ...currentLocation, x: decrementX(currentLocation.x, move.repeat) };
             default:
                 return currentLocation;
@@ -31,7 +43,9 @@ export namespace RobotControl {
     }
 
     const isRotateCommand = (cmd: RobotCommand) : cmd is Rotate => cmd.CommandType === CommandType.Rotate;
-    const isMoveCommand = (cmd: RobotCommand) : cmd is Move => cmd.CommandType === CommandType.Move;
+    const isMoveCommand = (cmd: RobotCommand) : cmd is Move => {
+        return cmd.CommandType === CommandType.Move;
+    };
     type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location;
 
     export const Robot: RunRobot = (currentLocation, commands) => commands.reduce<Location>((acc: Location, current: RobotCommand) =>
@@ -45,49 +59,28 @@ export namespace RobotControl {
     let incrementY: Increment = (y, incrementBy) => (y + incrementBy) % 100;
     let decrementY: Decrement = (y, decrementBy) => (y - decrementBy) >= 0 ? y - decrementBy : 100 + (y - decrementBy);
 
-    export enum CompassReading { North, South, East, West };
-    
-    interface RotateMapping {
-        currentDirection: CompassReading,
-        rotate: (directionToRotate: DirectionValue) => CompassReading
-    }
-
-    const rotateMappings: RotateMapping[] = [
-        { currentDirection: CompassReading.North, rotate: (directionToRotate: DirectionValue) => directionToRotate == DirectionValue.Left ? CompassReading.West : CompassReading.East },
-        { currentDirection: CompassReading.South, rotate: (directionToRotate: DirectionValue) => directionToRotate == DirectionValue.Left ? CompassReading.East : CompassReading.West },
-        { currentDirection: CompassReading.East, rotate: (directionToRotate: DirectionValue) => directionToRotate == DirectionValue.Left ? CompassReading.North : CompassReading.South },
-        { currentDirection: CompassReading.West, rotate: (directionToRotate: DirectionValue) => directionToRotate == DirectionValue.Left ? CompassReading.South : CompassReading.North },
-    ];
-
     type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
-    
-    export interface Location { portals: Portal, orientation: CompassReading, x: number, y: number };
 
-    export const parseDirection = (direction: string) : CompassReading => {
-        const mappings: Record<string, CompassReading> = {
-            'N': CompassReading.North,
-            'S': CompassReading.South,
-            'E': CompassReading.East,
-            'W': CompassReading.West
+    export const parseDirection = (direction: string) : Compass => {
+        const mappings: Record<string, Compass> = {
+            'N': Compass.North,
+            'S': Compass.South,
+            'E': Compass.East,
+            'W': Compass.West
         };
         return mappings[direction];
     }
 
-    export const parseInitialLocation = (direction: string, xStr: string, yStr: string): Location => {
+    export const parseInitialLocation = (direction: string, xStr: string, yStr: string): Location | undefined => {
         const x = Number.parseInt(xStr);
         const y = Number.parseInt(yStr);
-
-        if (isNaN(x) || isNaN(y)) {
-            throw Error(`Invalid initial location ${xStr} ${yStr}`);
-        }
-
-        return { x, y, orientation: parseDirection(direction), portals: {} } as RobotControl.Location;
+        return !isNaN(x) && !isNaN(y) ? { x, y, orientation: parseDirection(direction), portals: {} } : undefined;
     }
 
     export const parseRobotCommand = (command: string, repeat: number) : RobotCommand => 
         ({
-            'L': { Direction: DirectionValue.Left, repeat, CommandType: CommandType.Rotate },
-            'R': { Direction: DirectionValue.Right, repeat, CommandType: CommandType.Rotate },
+            'L': { Direction: Direction.Left, repeat, CommandType: CommandType.Rotate },
+            'R': { Direction: Direction.Right, repeat, CommandType: CommandType.Rotate },
             'M': { repeat, CommandType: CommandType.Move }
         } as Record<string, Rotate | Move>
         )[command.toUpperCase()];

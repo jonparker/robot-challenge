@@ -4,10 +4,10 @@
   "description": "Robot Control",
   "main": "index.js",
   "scripts": {
-    "test": "npm run-script build && node specs/specs.js",
+    "test": "npm run-script build && node out/specs/specs.js",
     "build": "tsc",
     "lint": "tslint --project tslint.json",
-    "start": "npm run-script build && node src/index.js"
+    "start": "node out/src/index.js data.txt"
   },
   "keywords": [
     "Robot",

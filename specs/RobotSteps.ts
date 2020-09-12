@@ -1,4 +1,3 @@
-import { repeat } from 'ramda';
 import { Assert, given, when, then } from 'typespec-bdd';
 import { RobotControl } from '../src/Robot';
 
@@ -24,7 +23,9 @@ export class RobotScenarioSteps {
 
 	@given(/^I have set the initial location as (\"\d+\"), (\"\d+\"), (\".+\")$/i)
 	initialLocationCommand(context: RobotContext, x: number, y: number, direction: string) {
-		context.initialLocation = RobotControl.parseInitialLocation(direction, x.toString(), y.toString());
+		const initialLoc = RobotControl.parseInitialLocation(direction, x.toString(), y.toString());
+		if (!initialLoc) throw new Error('Could not parse initial location');
+		context.initialLocation = initialLoc;
     }
 
     @when(/^I run the robot$/gi)
