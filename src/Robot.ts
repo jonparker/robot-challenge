@@ -91,9 +91,7 @@ const isError = (some: any) : some is Error => {
     return some.message && some.name && some.stack;
 }
 
-const parseInput = (initialLocationStr: string, commandsStr: string): { initialLocation: Location, commandList: RobotCommand[] } | Error => {
-    const initialLocation = parseInitialLocation(initialLocationStr);
-    if (isError(initialLocation)) return initialLocation;
+const parseCommands = (commandsStr: string): RobotCommand[] | Error => {
     enum ParseBufferState { CommandChar, CommandCharAndDigit, Empty };
     type CommandInfo = { command: string, repeats?: number };
 
@@ -138,14 +136,17 @@ const parseInput = (initialLocationStr: string, commandsStr: string): { initialL
         }
     });
 
-    const commandList = commandTokenList.map(cmd => robotParser.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
-    return { initialLocation, commandList };
+    return commandTokenList.map(cmd => robotParser.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
 }
 
-const Robot = (initialLocation: string, commandList: string) => {
-    const input = parseInput(initialLocation, commandList);
-    if (isError(input)) return input;
-    return runRobot(input.initialLocation, input.commandList);
+const Robot = (initialLocation: string, commandList: string) : Location | Error => {
+    const location = parseInitialLocation(initialLocation);
+    if (isError(location)) return location;
+
+    const commands = parseCommands(commandList);
+    if (isError(commands)) return commands;
+
+    return runRobot(location, commands);
 }
 
 const robotParser = {
