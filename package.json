@@ -7,7 +7,7 @@
     "test": "npm run-script build && node out/specs/specs.js",
     "build": "tsc",
     "lint": "tslint --project tslint.json",
-    "start": "node out/src/index.js data.txt"
+    "start": "npm run-script build && node out/src/index.js data.txt"
   },
   "keywords": [
     "Robot",
@@ -16,13 +16,21 @@
   "author": "Jonathan Parker",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/plugin-transform-typescript": "^7.11.0",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-typescript": "^7.10.4",
     "@types/node": "^14.0.1",
+    "babel-jest": "^26.3.0",
     "eslint": "^7.0.0",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.3.0",
     "ts-node": "^3.2.2",
     "typescript": "^3.9.7",
     "typespec-bdd": "^2.0.1"
   },
   "dependencies": {
+    "@types/jest": "^26.0.13",
     "@types/line-reader": "0.0.30",
     "@types/n-readlines": "^1.0.1",
     "@types/ramda": "^0.27.14",

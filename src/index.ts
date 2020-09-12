@@ -2,9 +2,14 @@ import { RobotControl } from './Robot';
 import * as fs from 'fs';
 import { argv } from 'process';
 
-const parseInitialLocation = (initialLocationStr: string): RobotControl.Location | undefined => {
+const parseInitialLocation = (initialLocationStr: string): RobotControl.Location => {
     const [initialDirectionStr, x, y] = initialLocationStr.split(' ');
-    const initialLocation = RobotControl.parseInitialLocation(initialDirectionStr, x, y);
+    const initialLocation = RobotControl.parser.parseInitialLocation(initialDirectionStr, x, y);
+    if (!initialLocation)
+    {
+        console.log(`Initial location ${initialLocationStr} could not be parsed.`);
+        throw Error(`Initial location ${initialLocationStr} could not be parsed.`);
+    }
     return initialLocation;
 }
 
@@ -12,10 +17,7 @@ const parseInitialLocation = (initialLocationStr: string): RobotControl.Location
     const fileContent = (await fs.promises.readFile(argv[2])).toString().split('\n');
     const [initialLocationStr, commandsStr, ..._] = fileContent;
     const initialLocation = parseInitialLocation(initialLocationStr);
-    if (!initialLocation)
-    {
-        console.log(`Initial location ${initialLocationStr} could not be parsed.`);
-    }
+    
     enum ParseBufferState { CommandChar, CommandCharAndDigit, Empty };
     type CommandInfo = { command: string, repeats?: number };
 
@@ -60,7 +62,7 @@ const parseInitialLocation = (initialLocationStr: string): RobotControl.Location
         }
     });
 
-    const commandList = commandTokenList.map(cmd => RobotControl.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
+    const commandList = commandTokenList.map(cmd => RobotControl.parser.parseRobotCommand(cmd.command, cmd.repeats || 1 ));
     const finalLocation = RobotControl.Robot(initialLocation, commandList);
     console.log(`Final location: ${RobotControl.Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}`);
 })();

@@ -4,7 +4,7 @@ export namespace RobotControl {
     enum Direction { Left, Right }
 
     export interface RobotCommand { CommandType: CommandType, repeat: number }
-    export enum Compass { North, South, East, West }
+    export enum Compass { North = 'North', South = 'South', East = 'East', West = 'West' }
     export interface Location { portals: Portal, orientation: Compass, x: number, y: number };
 
     interface Rotate extends RobotCommand { Direction: Direction, CommandType: CommandType.Rotate }
@@ -61,7 +61,7 @@ export namespace RobotControl {
 
     type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }};
 
-    export const parseDirection = (direction: string) : Compass => {
+    const parseDirection = (direction: string) : Compass => {
         const mappings: Record<string, Compass> = {
             'N': Compass.North,
             'S': Compass.South,
@@ -71,17 +71,23 @@ export namespace RobotControl {
         return mappings[direction];
     }
 
-    export const parseInitialLocation = (direction: string, xStr: string, yStr: string): Location | undefined => {
+    const parseInitialLocation = (direction: string, xStr: string, yStr: string): Location | undefined => {
         const x = Number.parseInt(xStr);
         const y = Number.parseInt(yStr);
         return !isNaN(x) && !isNaN(y) ? { x, y, orientation: parseDirection(direction), portals: {} } : undefined;
     }
 
-    export const parseRobotCommand = (command: string, repeat: number) : RobotCommand => 
+    const parseRobotCommand = (command: string, repeat: number) : RobotCommand => 
         ({
             'L': { Direction: Direction.Left, repeat, CommandType: CommandType.Rotate },
             'R': { Direction: Direction.Right, repeat, CommandType: CommandType.Rotate },
             'M': { repeat, CommandType: CommandType.Move }
         } as Record<string, Rotate | Move>
         )[command.toUpperCase()];
+
+    export const parser = {
+        parseDirection,
+        parseInitialLocation,
+        parseRobotCommand
+    };
 }
