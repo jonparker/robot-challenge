@@ -1,4 +1,4 @@
-import { Robot } from './Robot'
+import Robot from './Robot'
 import { Compass, isError } from './Types'
 
 describe('Robot', () => {

@@ -1,5 +1,5 @@
 import { isError, Rotate, Move, RobotCommand, Location, CommandType, Compass, Direction } from './Types'
-import { Parser } from './Parser'
+import Parser from './Parser'
 
 interface RotateMapping { currentDirection: Compass, rotate: (directionToRotate: Direction) => Compass }
 type RunRobot = (currentLocation: Location, command: RobotCommand[]) => Location
@@ -57,4 +57,4 @@ const Robot = (initialLocation: string, commandList: string): Location | Error =
     return runRobot(location, commands)
 }
 
-export { Robot }
+export default Robot

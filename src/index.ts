@@ -1,4 +1,4 @@
-import { Robot } from './Robot'
+import Robot from './Robot'
 import { promises as fsPromises } from 'fs'
 import { argv, stdout } from 'process'
 import { Compass, isError } from './Types'

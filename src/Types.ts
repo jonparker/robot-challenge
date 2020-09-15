@@ -2,9 +2,9 @@ enum CommandType { Rotate, Move }
 enum Direction { Left, Right }
 enum Compass { N = 'N', S = 'S', E = 'E', W = 'W' }
 
-interface RobotCommand { CommandType: CommandType, repeat: number }
-interface Location { portals: Portal, orientation: Compass, x: number, y: number }
-interface Portal { B?: {x: number, y: number}, O?: {x: number, y: number }}
+type RobotCommand = { CommandType: CommandType, repeat: number }
+type Location = { portals: Portal, orientation: Compass, x: number, y: number }
+type Portal = { B?: {x: number, y: number}, O?: {x: number, y: number }}
 interface Rotate extends RobotCommand { Direction: Direction, CommandType: CommandType.Rotate }
 interface Move extends RobotCommand { CommandType: CommandType.Move }
 

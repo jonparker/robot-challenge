@@ -80,7 +80,7 @@ const parseCommands = (commandsStr: string): RobotCommand[] | Error => {
     return commandTokenList.map(cmd => parseRobotCommand(cmd.command, cmd.repeats || 1 ))
 }
 
-export const Parser = {
+export default {
     parseDirection,
     parseInitialLocation,
     parseCommands
