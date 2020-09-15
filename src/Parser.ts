@@ -34,50 +34,23 @@ const parseInitialLocation = (initialLocationStr: string): Location | Error => {
 }
 
 const parseCommands = (commandsStr: string): RobotCommand[] | Error => {
-    enum ParseBufferState { CommandChar, CommandCharAndDigit, Empty }
-    type CommandInfo = { command: string, repeats?: number }
+    const commandList: RobotCommand[] = []
+    let repeats = 0
+    let hasRepeats = false
 
-    const commandTokenList: CommandInfo[] = []
-    let parseBuffer: ParseBufferState = ParseBufferState.Empty
-
-    commandsStr.split('').forEach(cmdChar => {
+    commandsStr.split('').reverse().forEach(cmdChar => {
         const cmdInt = +cmdChar
-        const cmdIsInt = !isNaN(cmdInt)
-
-        switch (parseBuffer) {
-            case ParseBufferState.Empty:
-                commandTokenList.push({ command: cmdChar })
-                parseBuffer = ParseBufferState.CommandChar
-                break
-            case ParseBufferState.CommandChar:
-                if (cmdIsInt)
-                {
-                    const cmd = commandTokenList.pop()
-                    if (cmd) {
-                        commandTokenList.push({ ...cmd, repeats: cmdInt })
-                    }
-                    parseBuffer = ParseBufferState.CommandCharAndDigit
-                }
-                else {
-                    commandTokenList.push({ command: cmdChar })
-                }
-                break
-            case ParseBufferState.CommandCharAndDigit:
-                if (cmdIsInt) {
-                    const cmd = commandTokenList.pop()
-                    if (cmd) {
-                        commandTokenList.push({ ...cmd, repeats: (10 * (cmd.repeats || 0)) + cmdInt })
-                    }
-                    parseBuffer = ParseBufferState.Empty
-                }
-                else {
-                    commandTokenList.push({ command: cmdChar })
-                    parseBuffer = ParseBufferState.CommandChar
-                }
-                break
+        if (isNaN(cmdInt)) {
+            commandList.push(parseRobotCommand(cmdChar, repeats || 1))
+            hasRepeats = false
+            repeats = 0
+        }
+        else {
+            repeats = hasRepeats ? ((cmdInt * 10) + repeats) : cmdInt
+            hasRepeats = true
         }
     })
-    return commandTokenList.map(cmd => parseRobotCommand(cmd.command, cmd.repeats || 1 ))
+    return commandList.reverse()
 }
 
 export default {
