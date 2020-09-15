@@ -12,10 +12,10 @@ const incrementY: Increment = (y, incrementBy) => (y + incrementBy) % 100;
 const decrementY: Decrement = (y, decrementBy) => (y - decrementBy) >= 0 ? y - decrementBy : 100 + (y - decrementBy);
 
 const rotateMappings: RotateMapping[] = [
-    { currentDirection: Compass.North, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.West : Compass.East },
-    { currentDirection: Compass.South, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.East : Compass.West },
-    { currentDirection: Compass.East, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.North : Compass.South },
-    { currentDirection: Compass.West, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.South : Compass.North },
+    { currentDirection: Compass.N, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.W : Compass.E },
+    { currentDirection: Compass.S, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.E : Compass.W },
+    { currentDirection: Compass.E, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.N : Compass.S },
+    { currentDirection: Compass.W, rotate: (rotate: Direction) => rotate === Direction.Left ? Compass.S : Compass.N },
 ];
 
 const RotateRobot = (currentLocation: Location, rotate: Rotate): Location => {
@@ -26,13 +26,13 @@ const RotateRobot = (currentLocation: Location, rotate: Rotate): Location => {
 
 const MoveRobot = (currentLocation: Location, move: Move): Location => {
     switch (currentLocation.orientation) {
-        case Compass.North:
+        case Compass.N:
             return { ...currentLocation, y: incrementY(currentLocation.y, move.repeat) };
-        case Compass.South:
+        case Compass.S:
             return { ...currentLocation, y: decrementY(currentLocation.y, move.repeat) };
-        case Compass.East:
+        case Compass.E:
             return { ...currentLocation, x: incrementX(currentLocation.x, move.repeat) };
-        case Compass.West:
+        case Compass.W:
             return { ...currentLocation, x: decrementX(currentLocation.x, move.repeat) };
         default:
             return currentLocation;

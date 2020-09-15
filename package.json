@@ -4,10 +4,9 @@
   "description": "Robot Control",
   "main": "index.js",
   "scripts": {
-    "test": "npm run-script build && node out/specs/specs.js",
-    "build": "tsc",
+    "test": "npm run-script build && jest",
     "lint": "tslint --project tslint.json",
-    "start": "npm run-script build && node out/src/index.js data.txt"
+    "start": "tsc && node out/index.js data.txt"
   },
   "keywords": [
     "Robot",
@@ -26,8 +25,7 @@
     "jest": "^26.4.2",
     "ts-jest": "^26.3.0",
     "ts-node": "^3.2.2",
-    "typescript": "^3.9.7",
-    "typespec-bdd": "^2.0.1"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "@types/jest": "^26.0.13",

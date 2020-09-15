@@ -8,6 +8,6 @@ import { Compass, isError } from './Types';
     const [initialLocation, commands, ..._] = fileContent;
     const finalLocation = Robot(initialLocation, commands);
     const output = isError(finalLocation) ? finalLocation.message :
-        `Final location: ${Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}\n`
+        `${Compass[finalLocation.orientation]} ${finalLocation.x} ${finalLocation.y}\n`
     stdout.write(output);
 })();

@@ -1,6 +1,6 @@
 enum CommandType { Rotate, Move }
 enum Direction { Left, Right }
-enum Compass { North = 'North', South = 'South', East = 'East', West = 'West' }
+enum Compass { N = 'N', S = 'S', E = 'E', W = 'W' }
 
 interface RobotCommand { CommandType: CommandType, repeat: number }
 interface Location { portals: Portal, orientation: Compass, x: number, y: number };

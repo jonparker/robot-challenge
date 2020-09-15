@@ -2,10 +2,10 @@ import { isError, Rotate, Move, RobotCommand, Location, CommandType, Compass, Di
 
 const parseDirection = (direction: string) : Compass | Error => {
     const mappings: Record<string, Compass> = {
-        'N': Compass.North,
-        'S': Compass.South,
-        'E': Compass.East,
-        'W': Compass.West
+        'N': Compass.N,
+        'S': Compass.S,
+        'E': Compass.E,
+        'W': Compass.W
     };
     return mappings[direction] ?? Error(`Could not parse direction ${direction}`);
 }
