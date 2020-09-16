@@ -14,7 +14,7 @@ const parseInitialLocationTokens = (direction: string, xStr: string, yStr: strin
     const x = +xStr
     const y = +yStr
     const orientation = parseDirection(direction)
-    return !isNaN(x) && !isNaN(y) && !isError(orientation) ? { x, y, orientation, portals: {} } :
+    return !isNaN(x) && !isNaN(y) && !isError(orientation) ? { x, y, orientation } :
         isError(orientation) ? orientation : Error(`Could not parse ${xStr} or ${yStr}`)
 }
 

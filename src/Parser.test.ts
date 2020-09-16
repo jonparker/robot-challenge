@@ -23,8 +23,8 @@ describe('Parser.parseRobotCommand', () => {
     ${'W 0 0'}    | ${0}    | ${0}    | ${Compass.W}
     ${'N 99 99'}  | ${99}   | ${99}   | ${Compass.N}
     ${'S 99 0'}   | ${99}   | ${0}    | ${Compass.S}
-    `('parseInitialLocation("$location) - { x: $expectX, y: $expectY, orientation: $expectOrientation, portals: {} }', (row: DataRow) => {
+    `('parseInitialLocation("$location) - { x: $expectX, y: $expectY, orientation: $expectOrientation }', (row: DataRow) => {
         const result = Parser.parseInitialLocation(row.location)
-        expect(result).toEqual({ x: row.expectX, y: row.expectY, orientation: row.expectOrientation, portals: {} })
+        expect(result).toEqual({ x: row.expectX, y: row.expectY, orientation: row.expectOrientation })
     })
 })
